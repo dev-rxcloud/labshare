@@ -16,7 +16,7 @@ async function act(fd: FormData) {
   const user = await requireUser(FACILITY_ROLES);
   const back = `/admin/bookings${str(fd, "qs")}`;
   try {
-    await staffSetStatus(user.id, str(fd, "id"), str(fd, "to") as BookingStatus, str(fd, "note") || undefined);
+    await staffSetStatus(user.id, str(fd, "rid"), str(fd, "to") as BookingStatus, str(fd, "note") || undefined);
     flash(back, "ok", "Booking updated.");
   } catch (e) {
     flash(back, "error", errMsg(e));
@@ -44,7 +44,7 @@ export default async function AdminBookings({ searchParams }: { searchParams: Pr
   const qs = `?${new URLSearchParams(Object.entries(sp).filter(([k, v]) => v && k !== "ok" && k !== "error") as [string, string][])}`;
   const btn = (id: string, to: BookingStatus, label: string, cls = "btn-secondary") => (
     <form action={act} key={to}>
-      <input type="hidden" name="id" value={id} />
+      <input type="hidden" name="rid" value={id} />
       <input type="hidden" name="to" value={to} />
       <input type="hidden" name="qs" value={qs} />
       <button className={cls}>{label}</button>

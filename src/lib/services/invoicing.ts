@@ -20,16 +20,19 @@ export async function buildStatement(customerId: string, period: string, setting
   const s = settings ?? (await getSettings());
   const { start, end } = periodBounds(period, s.timezone);
   const customer = await prisma.customer.findUniqueOrThrow({ where: { id: customerId }, include: { tier: true } });
+  // Items already on this period's *draft* still count: the preview shows what the invoice will contain once (re)generated.
+  const draft = await prisma.invoice.findFirst({ where: { customerId, period, status: "DRAFT" }, select: { id: true } });
+  const unbilled = draft ? { OR: [{ invoiceLineId: null }, { invoiceLine: { invoiceId: draft.id } }] } : { invoiceLineId: null };
   const [finalBookings, openBookings, adjustments] = await Promise.all([
     prisma.booking.findMany({
-      where: { customerId, invoiceLineId: null, status: { in: [...FINAL_STATUSES] }, startsAt: { lt: end } },
+      where: { customerId, ...unbilled, status: { in: [...FINAL_STATUSES] }, startsAt: { lt: end } },
       include: { equipment: true, user: true },
     }),
     prisma.booking.findMany({
       where: { customerId, status: { in: [...OPEN_STATUSES] }, startsAt: { gte: start, lt: end } },
       include: { equipment: true, user: true },
     }),
-    prisma.billingAdjustment.findMany({ where: { customerId, invoiceLineId: null, period: { lte: period } }, orderBy: { createdAt: "asc" } }),
+    prisma.billingAdjustment.findMany({ where: { customerId, ...unbilled, period: { lte: period } }, orderBy: { createdAt: "asc" } }),
   ]);
   const toBillable = (b: (typeof finalBookings)[number]) => ({
     id: b.id,

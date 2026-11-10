@@ -12,8 +12,8 @@ import { Card, Empty, Flash, PageHeader, StatusBadge } from "@/components/ui";
 async function act(fd: FormData) {
   "use server";
   const user = await requireCustomerUser();
-  const id = str(fd, "id");
-  const action = str(fd, "action");
+  const id = str(fd, "rid");
+  const action = str(fd, "op");
   const back = `/portal/bookings${str(fd, "qs")}`;
   try {
     if (action === "cancel") {
@@ -81,12 +81,12 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
                     <td className="text-xs text-slate-600">{b.checkedInAt ? `${fmt(b.checkedInAt, s.timezone, "HH:mm")}–${b.checkedOutAt ? fmt(b.checkedOutAt, s.timezone, "HH:mm") : "…"}` : "—"}</td>
                     <td className="text-right">
                       <form action={act} className="inline-flex gap-1">
-                        <input type="hidden" name="id" value={b.id} />
+                        <input type="hidden" name="rid" value={b.id} />
                         <input type="hidden" name="qs" value={qs} />
-                        {canCheckIn && <button name="action" value="checkin" className="btn-primary">Check in</button>}
-                        {b.status === "CHECKED_IN" && <button name="action" value="checkout" className="btn-primary">Check out</button>}
+                        {canCheckIn && <button name="op" value="checkin" className="btn-primary">Check in</button>}
+                        {b.status === "CHECKED_IN" && <button name="op" value="checkout" className="btn-primary">Check out</button>}
                         {terms.canCancel && (
-                          <button name="action" value="cancel" className="btn-danger" title={terms.late ? `Late cancellation: ${terms.feePercent}% fee` : "Free cancellation"}>
+                          <button name="op" value="cancel" className="btn-danger" title={terms.late ? `Late cancellation: ${terms.feePercent}% fee` : "Free cancellation"}>
                             Cancel{terms.late ? ` (${terms.feePercent}% fee)` : ""}
                           </button>
                         )}

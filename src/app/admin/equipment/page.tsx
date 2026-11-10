@@ -11,7 +11,7 @@ async function act(fd: FormData) {
   "use server";
   const user = await requireUser(["FACILITY_ADMIN"]);
   try {
-    switch (str(fd, "action")) {
+    switch (str(fd, "op")) {
       case "create": {
         const categoryName = str(fd, "category");
         const category = await prisma.equipmentCategory.upsert({ where: { name: categoryName }, update: {}, create: { name: categoryName } });
@@ -77,7 +77,7 @@ export default async function EquipmentAdmin({ searchParams }: { searchParams: P
             <div className="space-y-3">
               {[...tiers, null].map((t) => (
                 <form key={t?.id ?? "new"} action={act} className="grid grid-cols-6 gap-1 rounded border border-slate-100 p-2">
-                  <input type="hidden" name="action" value="tier" />
+                  <input type="hidden" name="op" value="tier" />
                   <input type="hidden" name="tierId" value={t?.id ?? ""} />
                   <input className="input col-span-3" name="name" defaultValue={t?.name} placeholder="New plan" required disabled={!isAdmin} />
                   <input className="input" name="level" type="number" defaultValue={t?.level ?? 1} title="Level" disabled={!isAdmin} />
@@ -92,7 +92,7 @@ export default async function EquipmentAdmin({ searchParams }: { searchParams: P
           {isAdmin && (
             <Card title="Add equipment">
               <form action={act} className="space-y-3">
-                <input type="hidden" name="action" value="create" />
+                <input type="hidden" name="op" value="create" />
                 <div><label className="label">Name</label><input className="input" name="name" required /></div>
                 <div className="grid grid-cols-2 gap-2">
                   <div><label className="label">Asset tag</label><input className="input" name="assetTag" required /></div>

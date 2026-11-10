@@ -15,9 +15,9 @@ import { Card, Flash, PageHeader } from "@/components/ui";
 async function act(fd: FormData) {
   "use server";
   const user = await requireUser(["FACILITY_ADMIN"]);
-  const id = str(fd, "id");
+  const id = str(fd, "rid");
   const back = `/admin/invoices/${id}`;
-  const action = str(fd, "action");
+  const action = str(fd, "op");
   try {
     if (action === "issue") {
       await issueInvoice(id, user.id);
@@ -81,16 +81,16 @@ export default async function AdminInvoice({ params, searchParams }: { params: P
             <Card title="Review draft">
               <p className="mb-3 text-sm text-slate-600">Check the lines, correct usage or add adjustments on the customer page, then recalculate. Issuing emails the invoice and starts the payment clock.</p>
               <div className="flex flex-wrap gap-2">
-                <form action={act}><input type="hidden" name="id" value={invoice.id} /><button name="action" value="issue" className="btn-primary">Issue & email</button></form>
-                <form action={act}><input type="hidden" name="id" value={invoice.id} /><button name="action" value="regenerate" className="btn-secondary">Recalculate</button></form>
+                <form action={act}><input type="hidden" name="rid" value={invoice.id} /><button name="op" value="issue" className="btn-primary">Issue & email</button></form>
+                <form action={act}><input type="hidden" name="rid" value={invoice.id} /><button name="op" value="regenerate" className="btn-secondary">Recalculate</button></form>
               </div>
             </Card>
           )}
           {invoice.status === "ISSUED" && (
             <Card title="Record a payment">
               <form action={act} className="space-y-3">
-                <input type="hidden" name="id" value={invoice.id} />
-                <input type="hidden" name="action" value="payment" />
+                <input type="hidden" name="rid" value={invoice.id} />
+                <input type="hidden" name="op" value="payment" />
                 <div><label className="label">Amount</label><input className="input" name="amount" defaultValue={(balance / 100).toFixed(2)} required /></div>
                 <div><label className="label">Received on</label><input className="input" type="date" name="receivedAt" defaultValue={localDateString(new Date(), s.timezone)} required /></div>
                 <div>
@@ -105,9 +105,9 @@ export default async function AdminInvoice({ params, searchParams }: { params: P
           {(invoice.status === "DRAFT" || (invoice.status === "ISSUED" && invoice.paidCents === 0)) && (
             <Card title="Void">
               <form action={act} className="space-y-2">
-                <input type="hidden" name="id" value={invoice.id} />
+                <input type="hidden" name="rid" value={invoice.id} />
                 <input className="input" name="reason" placeholder="Reason" required />
-                <button name="action" value="void" className="btn-danger w-full">Void invoice</button>
+                <button name="op" value="void" className="btn-danger w-full">Void invoice</button>
               </form>
             </Card>
           )}

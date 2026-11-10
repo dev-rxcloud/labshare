@@ -18,7 +18,7 @@ async function act(fd: FormData) {
   const back = `/admin/equipment/${id}`;
   try {
     const s = await getSettings();
-    switch (str(fd, "action")) {
+    switch (str(fd, "op")) {
       case "update": {
         if (user.role !== "FACILITY_ADMIN") throw new Error("Only facility admins can change equipment settings.");
         const data = {
@@ -92,7 +92,7 @@ export default async function EquipmentDetail({ params, searchParams }: { params
         <Card title="Settings & access rules" className="lg:col-span-2">
           <form action={act}>
             {hidden}
-            <input type="hidden" name="action" value="update" />
+            <input type="hidden" name="op" value="update" />
             <fieldset disabled={!isAdmin} className="grid gap-3 sm:grid-cols-3">
               <div className="sm:col-span-2"><label className="label">Name</label><input className="input" name="name" defaultValue={e.name} /></div>
               <div><label className="label">Status</label><select className="input" name="status" defaultValue={e.status}><option>ACTIVE</option><option>MAINTENANCE</option><option>RETIRED</option></select></div>
@@ -124,7 +124,7 @@ export default async function EquipmentDetail({ params, searchParams }: { params
                 return (
                   <li key={m.id} className="flex items-start justify-between gap-2">
                     <span>{fmt(m.startsAt, s.timezone)} → {fmt(m.endsAt, s.timezone)}<span className="block text-xs text-slate-500">{m.reason}{clash ? ` · ⚠ overlaps ${clash} booking(s)` : ""}</span></span>
-                    <form action={act}>{hidden}<input type="hidden" name="windowId" value={m.id} /><button name="action" value="delete-maintenance" className="text-xs text-red-600">remove</button></form>
+                    <form action={act}>{hidden}<input type="hidden" name="windowId" value={m.id} /><button name="op" value="delete-maintenance" className="text-xs text-red-600">remove</button></form>
                   </li>
                 );
               })}
@@ -137,7 +137,7 @@ export default async function EquipmentDetail({ params, searchParams }: { params
               <input className="input" type="date" name="endDate" required />
               <input className="input" type="time" name="endTime" defaultValue="17:00" required />
               <input className="input col-span-2" name="reason" placeholder="Reason (e.g. annual service)" />
-              <button name="action" value="maintenance" className="btn-secondary col-span-2">Block time</button>
+              <button name="op" value="maintenance" className="btn-secondary col-span-2">Block time</button>
             </form>
           </Card>
           <Card title="Upcoming bookings">

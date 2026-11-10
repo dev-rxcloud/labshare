@@ -20,7 +20,7 @@ async function act(fd: FormData) {
   const period = str(fd, "period");
   const back = `/admin/usage/${customerId}?period=${period}`;
   try {
-    switch (str(fd, "action")) {
+    switch (str(fd, "op")) {
       case "adjust": {
         const amount = centsField(fd, "amount") * (str(fd, "sign") === "credit" ? -1 : 1);
         if (!amount) throw new Error("Enter an amount.");
@@ -89,7 +89,7 @@ export default async function CustomerUsage({ params, searchParams }: { params: 
           title={invoice && invoice.status !== "DRAFT" ? "Uninvoiced items (will roll into the next invoice)" : "Statement preview (exactly what will be invoiced)"}
           actions={
             invoice ? <Link className="link text-sm" href={`/admin/invoices/${invoice.id}`}>Invoice {invoice.number} <StatusBadge status={invoice.status} /></Link> : (
-              <form action={act}>{hidden}<button name="action" value="generate" className="btn-primary">Generate draft</button></form>
+              <form action={act}>{hidden}<button name="op" value="generate" className="btn-primary">Generate draft</button></form>
             )
           }
         >
@@ -98,7 +98,7 @@ export default async function CustomerUsage({ params, searchParams }: { params: 
         <Card title="Add credit or charge">
           <form action={act} className="space-y-3">
             {hidden}
-            <input type="hidden" name="action" value="adjust" />
+            <input type="hidden" name="op" value="adjust" />
             <div><label className="label">Description</label><input className="input" name="description" required placeholder="e.g. Instrument downtime credit" /></div>
             <div className="grid grid-cols-2 gap-2">
               <select className="input" name="sign"><option value="credit">Credit (−)</option><option value="charge">Charge (+)</option></select>
@@ -112,7 +112,7 @@ export default async function CustomerUsage({ params, searchParams }: { params: 
                 <li key={a.id} className="flex items-center justify-between gap-2">
                   <span>{a.description}</span>
                   <span className="flex items-center gap-2 tabular-nums">{money(a.amountCents, s.currency)}
-                    {!a.invoiceLineId && <form action={act}>{hidden}<input type="hidden" name="adjustmentId" value={a.id} /><button name="action" value="delete-adjustment" className="text-xs text-red-600">remove</button></form>}
+                    {!a.invoiceLineId && <form action={act}>{hidden}<input type="hidden" name="adjustmentId" value={a.id} /><button name="op" value="delete-adjustment" className="text-xs text-red-600">remove</button></form>}
                   </span>
                 </li>
               ))}
@@ -138,7 +138,7 @@ export default async function CustomerUsage({ params, searchParams }: { params: 
                         <input className="input w-24" type="time" name="in" defaultValue={fmt(b.checkedInAt ?? b.startsAt, s.timezone, "HH:mm")} />
                         <span>–</span>
                         <input className="input w-24" type="time" name="out" defaultValue={fmt(b.checkedOutAt ?? b.endsAt, s.timezone, "HH:mm")} />
-                        <button name="action" value="times" className="btn-secondary">Save</button>
+                        <button name="op" value="times" className="btn-secondary">Save</button>
                       </form>
                     ) : (
                       <span className="text-xs text-slate-600">{b.checkedInAt ? `${fmt(b.checkedInAt, s.timezone, "HH:mm")}–${fmt(b.checkedOutAt, s.timezone, "HH:mm")}` : "—"}</span>

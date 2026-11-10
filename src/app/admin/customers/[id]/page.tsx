@@ -16,7 +16,7 @@ async function act(fd: FormData) {
   const user = await requireUser(FACILITY_ROLES);
   const id = str(fd, "customerId");
   const back = `/admin/customers/${id}`;
-  const action = str(fd, "action");
+  const action = str(fd, "op");
   const adminOnly = ["update", "grant", "revoke-grant", "rate", "remove-rate", "add-user"];
   try {
     if (adminOnly.includes(action) && user.role !== "FACILITY_ADMIN") throw new Error("Only facility admins can change commercial settings.");
@@ -134,7 +134,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
         <Card title="Account & billing">
           <form action={act} className="space-y-3">
             {hidden}
-            <input type="hidden" name="action" value="update" />
+            <input type="hidden" name="op" value="update" />
             <fieldset disabled={!isAdmin} className="space-y-3">
               <div><label className="label">Name</label><input className="input" name="name" defaultValue={customer.name} required /></div>
               <div><label className="label">Billing email</label><input className="input" name="billingEmail" type="email" defaultValue={customer.billingEmail} required /></div>
@@ -163,7 +163,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
             </fieldset>
           </form>
           {customer.status === "SUSPENDED" && customer.suspendedReason?.startsWith("AUTO:") && (
-            <form action={act} className="mt-3">{hidden}<button name="action" value="reinstate-check" className="btn-secondary w-full">Re-check overdue status</button></form>
+            <form action={act} className="mt-3">{hidden}<button name="op" value="reinstate-check" className="btn-secondary w-full">Re-check overdue status</button></form>
           )}
         </Card>
 
@@ -180,7 +180,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
                         {u.certifications.map((c) => (
                           <form action={act} key={c.id} className="inline">
                             {hidden}<input type="hidden" name="certId" value={c.id} />
-                            <button name="action" value="revoke-cert" title="Revoke">
+                            <button name="op" value="revoke-cert" title="Revoke">
                               <Badge tone={c.expiresAt && c.expiresAt < new Date() ? "red" : "green"}>{c.equipment.name}{c.expiresAt ? ` · ${fmtDate(c.expiresAt, s.timezone)}` : ""} ×</Badge>
                             </button>
                           </form>
@@ -190,7 +190,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
                         {hidden}<input type="hidden" name="userId" value={u.id} />
                         <select className="input w-auto" name="equipmentId">{equipment.filter((e) => e.requiresCertification).map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}</select>
                         <input className="input w-auto" type="date" name="expiresAt" title="Expiry (optional)" />
-                        <button name="action" value="cert" className="btn-secondary">Certify</button>
+                        <button name="op" value="cert" className="btn-secondary">Certify</button>
                       </form>
                     </td>
                   </tr>
@@ -204,7 +204,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
                 <input className="input" name="email" type="email" placeholder="Email" required />
                 <input className="input" name="password" placeholder="Temp password" minLength={8} required />
                 <select className="input" name="role"><option value="CUSTOMER_MEMBER">Member</option><option value="CUSTOMER_ADMIN">Admin</option></select>
-                <button name="action" value="add-user" className="btn-secondary">Add user</button>
+                <button name="op" value="add-user" className="btn-secondary">Add user</button>
               </form>
             )}
           </Card>
@@ -215,14 +215,14 @@ export default async function CustomerDetail({ params, searchParams }: { params:
             </p>
             <div className="mb-3 flex flex-wrap gap-1">
               {customer.grants.map((g) => (
-                <form action={act} key={g.id}>{hidden}<input type="hidden" name="grantId" value={g.id} /><button name="action" value="revoke-grant" disabled={!isAdmin}><Badge tone="purple">{g.equipment.name} ×</Badge></button></form>
+                <form action={act} key={g.id}>{hidden}<input type="hidden" name="grantId" value={g.id} /><button name="op" value="revoke-grant" disabled={!isAdmin}><Badge tone="purple">{g.equipment.name} ×</Badge></button></form>
               ))}
             </div>
             {isAdmin && (
               <form action={act} className="flex gap-2">
                 {hidden}
                 <select className="input" name="equipmentId">{equipment.filter((e) => !customer.grants.some((g) => g.equipmentId === e.id)).map((e) => <option key={e.id} value={e.id}>{e.name}{e.restricted ? " (restricted)" : ` (level ${e.minTierLevel})`}</option>)}</select>
-                <button name="action" value="grant" className="btn-secondary">Grant</button>
+                <button name="op" value="grant" className="btn-secondary">Grant</button>
               </form>
             )}
           </Card>
@@ -232,7 +232,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
               {customer.rateOverrides.map((r) => (
                 <li key={r.id} className="flex items-center justify-between">
                   <span>{r.equipment.name}: <span className="tabular-nums">{money(r.hourlyRateCents, s.currency)}/h</span> <span className="text-xs text-slate-500">(list {money(r.equipment.hourlyRateCents, s.currency)})</span></span>
-                  {isAdmin && <form action={act}>{hidden}<input type="hidden" name="rateId" value={r.id} /><button name="action" value="remove-rate" className="text-xs text-red-600">remove</button></form>}
+                  {isAdmin && <form action={act}>{hidden}<input type="hidden" name="rateId" value={r.id} /><button name="op" value="remove-rate" className="text-xs text-red-600">remove</button></form>}
                 </li>
               ))}
               {customer.rateOverrides.length === 0 && <li className="text-slate-500">List prices apply.</li>}
@@ -242,7 +242,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
                 {hidden}
                 <select className="input" name="equipmentId">{equipment.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}</select>
                 <input className="input w-32" name="rate" placeholder="$/hour" required />
-                <button name="action" value="rate" className="btn-secondary">Set rate</button>
+                <button name="op" value="rate" className="btn-secondary">Set rate</button>
               </form>
             )}
             <p className="mt-2 text-xs text-slate-500">Rates are captured on each booking at the time it is made.</p>

@@ -84,6 +84,9 @@ describe.skipIf(!enabled)("billing cycle (integration)", async () => {
     expect(inv.discountCents).toBe(3250);
     expect(inv.totalCents).toBe(132500 - 3250 + Math.round((132500 - 3250) * 0.1));
 
+    // The live preview still matches the draft once items are attached to it.
+    expect((await buildStatement(customerId, "2026-10")).totalCents).toBe(inv.totalCents);
+
     // Regenerating keeps the number and doesn't double count.
     const number = inv.number;
     const regen = await generateInvoice(customerId, "2026-10");

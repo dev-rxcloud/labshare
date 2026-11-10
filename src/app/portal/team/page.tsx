@@ -30,7 +30,7 @@ async function toggleMember(fd: FormData) {
   "use server";
   const admin = await requireCustomerUser();
   if (admin.role !== "CUSTOMER_ADMIN") redirect("/portal");
-  const u = await prisma.user.findUnique({ where: { id: str(fd, "id") } });
+  const u = await prisma.user.findUnique({ where: { id: str(fd, "rid") } });
   if (!u || u.customerId !== admin.customer.id || u.id === admin.id) flash("/portal/team", "error", "Not allowed.");
   await prisma.user.update({ where: { id: u!.id }, data: { active: !u!.active } });
   await audit(admin.id, u!.active ? "user.deactivate" : "user.activate", "User", u!.id);
@@ -70,7 +70,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
                   <td className="text-right">
                     {m.id !== user.id && (
                       <form action={toggleMember}>
-                        <input type="hidden" name="id" value={m.id} />
+                        <input type="hidden" name="rid" value={m.id} />
                         <button className={m.active ? "btn-danger" : "btn-secondary"}>{m.active ? "Deactivate" : "Reactivate"}</button>
                       </form>
                     )}
