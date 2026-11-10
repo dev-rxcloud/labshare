@@ -226,6 +226,7 @@ model Booking {
   autoClosed      Boolean       @default(false) // closed by housekeeping job, flagged for review
   cancelledAt     DateTime?
   cancelReason    String?
+  feeWaived       Boolean       @default(false) // facility-initiated cancellation or waived no-show: never charged
   invoiceLineId   String?       @unique
   invoiceLine     InvoiceLine?  @relation(fields: [invoiceLineId], references: [id])
   createdAt       DateTime      @default(now())

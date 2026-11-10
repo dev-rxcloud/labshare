@@ -200,7 +200,8 @@ export async function staffSetStatus(actorId: string, bookingId: string, status:
   };
   if (!allowed[booking.status]?.includes(status)) throw new Error(`Cannot change ${booking.status} to ${status}.`);
   const data: Prisma.BookingUpdateInput = { status };
-  if (status === "CANCELLED") Object.assign(data, { cancelledAt: new Date(), cancelReason: note || "Cancelled by facility" });
+  if (status === "CANCELLED")
+    Object.assign(data, { cancelledAt: new Date(), feeWaived: true, cancelReason: note || (booking.status === "NO_SHOW" ? "No-show fee waived by facility" : "Cancelled by facility") });
   if (status === "CHECKED_IN") data.checkedInAt = booking.startsAt;
   if (status === "COMPLETED" && !booking.checkedOutAt) Object.assign(data, { checkedInAt: booking.checkedInAt ?? booking.startsAt, checkedOutAt: booking.endsAt });
   await prisma.booking.update({ where: { id: bookingId }, data });

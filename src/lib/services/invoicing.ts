@@ -44,6 +44,7 @@ export async function buildStatement(customerId: string, period: string, setting
     checkedOutAt: b.checkedOutAt,
     cancelledAt: b.cancelledAt,
     autoClosed: b.autoClosed,
+    feeWaived: b.feeWaived,
   });
   const statement = computeStatement({
     policy: s,

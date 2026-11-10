@@ -25,6 +25,7 @@ export interface BillableBooking {
   checkedOutAt: Date | null;
   cancelledAt: Date | null;
   autoClosed?: boolean;
+  feeWaived?: boolean;
 }
 
 export interface BillableAdjustment {
@@ -120,7 +121,7 @@ export function computeStatement(input: {
         break;
       }
       case "NO_SHOW": {
-        if (policy.noShowFeePercent <= 0) break;
+        if (policy.noShowFeePercent <= 0 || b.feeWaived) break;
         const amount = cents(((b.hourlyRateCents * bookedMinutes) / 60) * (policy.noShowFeePercent / 100));
         lines.push({
           kind: "NO_SHOW",
@@ -134,7 +135,7 @@ export function computeStatement(input: {
         break;
       }
       case "CANCELLED": {
-        if (!b.cancelledAt || policy.lateCancelFeePercent <= 0) break;
+        if (!b.cancelledAt || policy.lateCancelFeePercent <= 0 || b.feeWaived) break;
         const late = b.startsAt.getTime() - b.cancelledAt.getTime() < policy.lateCancelWindowHours * 3600000;
         if (!late) break;
         const amount = cents(((b.hourlyRateCents * bookedMinutes) / 60) * (policy.lateCancelFeePercent / 100));

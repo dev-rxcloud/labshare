@@ -68,6 +68,11 @@ describe("computeStatement", () => {
     expect(early.lines).toHaveLength(0);
   });
 
+  it("never charges waived bookings", () => {
+    expect(run([booking({ status: "NO_SHOW", feeWaived: true })]).lines).toHaveLength(0);
+    expect(run([booking({ status: "CANCELLED", cancelledAt: T("05T11:00:00"), feeWaived: true })]).lines).toHaveLength(0);
+  });
+
   it("does not bill rejected bookings and reports open ones", () => {
     const s = run([booking({ id: "r", status: "REJECTED" }), booking({ id: "o", status: "CONFIRMED" })]);
     expect(s.lines).toHaveLength(0);
