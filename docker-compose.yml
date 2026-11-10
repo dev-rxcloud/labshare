@@ -1,0 +1,33 @@
+# Self-hosted stack: Postgres, the app, and an hourly scheduler for billing automation.
+#   cp .env.example .env   # set SESSION_SECRET and CRON_SECRET
+#   docker compose up -d --build
+#   docker compose exec app npm run db:seed   # optional demo data
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: labshare
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/labshare
+    ports: ["3000:3000"]
+    depends_on:
+      db: { condition: service_healthy }
+
+  scheduler:
+    image: curlimages/curl:8.11.1
+    env_file: .env
+    depends_on: [app]
+    entrypoint: ["sh", "-c", "while true; do sleep 3600; curl -sS -H \"Authorization: Bearer $$CRON_SECRET\" http://app:3000/api/cron/run; echo; done"]
+
+volumes:
+  pgdata:

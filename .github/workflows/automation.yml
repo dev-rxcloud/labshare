@@ -1,0 +1,24 @@
+# Backup scheduler: calls the deployed app's automation endpoint every hour.
+# Configure repository secrets APP_URL (e.g. https://labshare.example.com) and CRON_SECRET.
+# Not needed if your host already runs the cron (vercel.json, docker-compose scheduler, etc.) — but harmless, because every step is idempotent.
+name: Billing automation
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger automation
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "APP_URL / CRON_SECRET secrets not configured; skipping."
+            exit 0
+          fi
+          curl --fail-with-body -sS -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/run"
