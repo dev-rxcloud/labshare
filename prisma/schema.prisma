@@ -1,0 +1,370 @@
+// LabShare data model.
+// All timestamps are stored in UTC. Money is stored as integer cents.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Facility-wide settings (single row, id = 1)
+// ---------------------------------------------------------------------------
+model FacilitySettings {
+  id                       Int      @id @default(1)
+  facilityName             String   @default("LabShare Facility")
+  timezone                 String   @default("America/New_York")
+  currency                 String   @default("USD")
+  taxRatePercent           Decimal  @default(0) @db.Decimal(5, 2)
+  // Booking policy
+  slotMinutes              Int      @default(15)
+  maxAdvanceDays           Int      @default(60)
+  lateCancelWindowHours    Int      @default(24)
+  lateCancelFeePercent     Int      @default(50)
+  noShowFeePercent         Int      @default(100)
+  noShowGraceMinutes       Int      @default(30)
+  // Invoicing automation
+  autoGenerateInvoices     Boolean  @default(true)
+  autoIssueInvoices        Boolean  @default(false) // false = drafts wait for admin review
+  autoIssueAfterDays       Int      @default(3) // drafts not reviewed within N days are issued automatically
+  paymentTermsDays         Int      @default(30)
+  reminderDaysBeforeDue    Int      @default(7)
+  reminderEveryDaysOverdue Int      @default(7)
+  suspendAfterDaysOverdue  Int      @default(45) // 0 = never auto-suspend
+  lateFeePercent           Decimal  @default(0) @db.Decimal(5, 2) // one-time late fee added on the next invoice
+  invoiceFooter            String   @default("Please remit payment by bank transfer quoting the invoice number.")
+  billingEmail             String   @default("billing@labshare.local")
+  updatedAt                DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Customers (research companies) and their people
+// ---------------------------------------------------------------------------
+model PricingTier {
+  id              String     @id @default(cuid())
+  name            String     @unique
+  level           Int        @default(1) // higher level unlocks more equipment
+  discountPercent Decimal    @default(0) @db.Decimal(5, 2)
+  description     String?
+  customers       Customer[]
+}
+
+enum CustomerStatus {
+  PENDING // signed up, awaiting facility approval
+  ACTIVE
+  SUSPENDED // cannot book (manual, or automatic for overdue invoices)
+  CLOSED
+}
+
+model Customer {
+  id                     String                  @id @default(cuid())
+  name                   String
+  billingEmail           String
+  billingAddress         String?
+  taxId                  String?
+  status                 CustomerStatus          @default(PENDING)
+  suspendedReason        String?
+  tierId                 String
+  tier                   PricingTier             @relation(fields: [tierId], references: [id])
+  officeSuite            String?
+  monthlyOfficeRentCents Int                     @default(0)
+  monthlyHourQuota       Int? // optional cap on equipment hours per month
+  paymentTermsDays       Int? // overrides facility default
+  notes                  String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  users                  User[]
+  bookings               Booking[]
+  grants                 EquipmentGrant[]
+  rateOverrides          CustomerEquipmentRate[]
+  invoices               Invoice[]
+  adjustments            BillingAdjustment[]
+}
+
+enum Role {
+  FACILITY_ADMIN
+  FACILITY_STAFF
+  CUSTOMER_ADMIN
+  CUSTOMER_MEMBER
+}
+
+model User {
+  id             String              @id @default(cuid())
+  email          String              @unique
+  name           String
+  passwordHash   String
+  role           Role
+  active         Boolean             @default(true)
+  customerId     String?
+  customer       Customer?           @relation(fields: [customerId], references: [id])
+  createdAt      DateTime            @default(now())
+  bookings       Booking[]           @relation("BookingUser")
+  certifications UserCertification[]
+}
+
+// ---------------------------------------------------------------------------
+// Equipment and access control
+// ---------------------------------------------------------------------------
+model EquipmentCategory {
+  id        String      @id @default(cuid())
+  name      String      @unique
+  equipment Equipment[]
+}
+
+enum EquipmentStatus {
+  ACTIVE
+  MAINTENANCE
+  RETIRED
+}
+
+model Equipment {
+  id                      String                  @id @default(cuid())
+  name                    String
+  assetTag                String                  @unique
+  description             String?
+  location                String?
+  categoryId              String
+  category                EquipmentCategory       @relation(fields: [categoryId], references: [id])
+  status                  EquipmentStatus         @default(ACTIVE)
+  hourlyRateCents         Int
+  billingIncrementMinutes Int                     @default(15)
+  minBookingMinutes       Int                     @default(30)
+  maxBookingMinutes       Int                     @default(480)
+  bufferMinutes           Int                     @default(0) // cleanup time between bookings
+  bookableFromHour        Int                     @default(0) // facility-local hour, inclusive
+  bookableToHour          Int                     @default(24) // facility-local hour, exclusive
+  minTierLevel            Int                     @default(1)
+  restricted              Boolean                 @default(false) // only customers with an explicit grant
+  requiresCertification   Boolean                 @default(false)
+  requiresApproval        Boolean                 @default(false)
+  createdAt               DateTime                @default(now())
+  updatedAt               DateTime                @updatedAt
+  bookings                Booking[]
+  grants                  EquipmentGrant[]
+  certifications          UserCertification[]
+  maintenance             MaintenanceWindow[]
+  rateOverrides           CustomerEquipmentRate[]
+}
+
+model EquipmentGrant {
+  id          String    @id @default(cuid())
+  customerId  String
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([customerId, equipmentId])
+}
+
+model CustomerEquipmentRate {
+  id              String    @id @default(cuid())
+  customerId      String
+  customer        Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  equipmentId     String
+  equipment       Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  hourlyRateCents Int
+
+  @@unique([customerId, equipmentId])
+}
+
+model UserCertification {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  grantedAt   DateTime  @default(now())
+  expiresAt   DateTime?
+
+  @@unique([userId, equipmentId])
+}
+
+model MaintenanceWindow {
+  id          String    @id @default(cuid())
+  equipmentId String
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  startsAt    DateTime
+  endsAt      DateTime
+  reason      String?
+
+  @@index([equipmentId, startsAt])
+}
+
+// ---------------------------------------------------------------------------
+// Bookings and usage
+// ---------------------------------------------------------------------------
+enum BookingStatus {
+  PENDING_APPROVAL
+  CONFIRMED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  REJECTED
+  NO_SHOW
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  equipmentId     String
+  equipment       Equipment     @relation(fields: [equipmentId], references: [id])
+  userId          String
+  user            User          @relation("BookingUser", fields: [userId], references: [id])
+  customerId      String
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  startsAt        DateTime
+  endsAt          DateTime
+  status          BookingStatus @default(CONFIRMED)
+  purpose         String?
+  // Rate snapshot taken at booking time (after per-customer override, before tier discount)
+  hourlyRateCents Int
+  checkedInAt     DateTime?
+  checkedOutAt    DateTime?
+  autoClosed      Boolean       @default(false) // closed by housekeeping job, flagged for review
+  cancelledAt     DateTime?
+  cancelReason    String?
+  invoiceLineId   String?       @unique
+  invoiceLine     InvoiceLine?  @relation(fields: [invoiceLineId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([equipmentId, startsAt])
+  @@index([customerId, startsAt])
+}
+
+// Manual credit (negative) or charge (positive) applied to a billing period
+model BillingAdjustment {
+  id            String       @id @default(cuid())
+  customerId    String
+  customer      Customer     @relation(fields: [customerId], references: [id])
+  period        String // "YYYY-MM"
+  description   String
+  amountCents   Int
+  isLateFee     Boolean      @default(false)
+  createdById   String?
+  createdAt     DateTime     @default(now())
+  invoiceLineId String?      @unique
+  invoiceLine   InvoiceLine? @relation(fields: [invoiceLineId], references: [id])
+
+  @@index([customerId, period])
+}
+
+// ---------------------------------------------------------------------------
+// Invoicing
+// ---------------------------------------------------------------------------
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  VOID
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  number         String        @unique
+  customerId     String
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  period         String // "YYYY-MM"
+  status         InvoiceStatus @default(DRAFT)
+  currency       String
+  subtotalCents  Int
+  discountCents  Int
+  taxCents       Int
+  totalCents     Int
+  paidCents      Int           @default(0)
+  issuedAt       DateTime?
+  dueAt          DateTime?
+  paidAt         DateTime?
+  voidedAt       DateTime?
+  lastReminderAt DateTime?
+  reminderCount  Int           @default(0)
+  lateFeeApplied Boolean       @default(false)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  lines          InvoiceLine[]
+  payments       Payment[]
+
+  @@index([customerId, period])
+  @@index([status, dueAt])
+}
+
+enum InvoiceLineKind {
+  EQUIPMENT_USAGE
+  LATE_CANCELLATION
+  NO_SHOW
+  OFFICE_RENT
+  ADJUSTMENT
+  LATE_FEE
+}
+
+model InvoiceLine {
+  id           String             @id @default(cuid())
+  invoiceId    String
+  invoice      Invoice            @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  kind         InvoiceLineKind
+  description  String
+  quantity     Decimal            @db.Decimal(10, 2) // hours for usage lines, 1 otherwise
+  unitCents    Int
+  amountCents  Int // before tier discount
+  discountable Boolean            @default(true)
+  sortOrder    Int                @default(0)
+  booking      Booking?
+  adjustment   BillingAdjustment?
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CHEQUE
+  CARD
+  CASH
+  OTHER
+}
+
+model Payment {
+  id           String        @id @default(cuid())
+  invoiceId    String
+  invoice      Invoice       @relation(fields: [invoiceId], references: [id])
+  amountCents  Int
+  method       PaymentMethod
+  reference    String?
+  receivedAt   DateTime
+  recordedById String?
+  createdAt    DateTime      @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Automation audit trail
+// ---------------------------------------------------------------------------
+model JobRun {
+  id         String    @id @default(cuid())
+  job        String
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+  ok         Boolean?
+  summary    Json?
+}
+
+model EmailLog {
+  id        String   @id @default(cuid())
+  to        String
+  subject   String
+  body      String
+  kind      String
+  relatedId String?
+  sentAt    DateTime @default(now())
+  status    String   @default("sent")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String?
+  data      Json?
+  createdAt DateTime @default(now())
+}
