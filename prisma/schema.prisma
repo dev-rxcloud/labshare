@@ -283,6 +283,7 @@ model Invoice {
   reminderCount  Int           @default(0)
   lateFeeApplied Boolean       @default(false)
   notes          String?
+  warnings       String[]      @default([])
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   lines          InvoiceLine[]
