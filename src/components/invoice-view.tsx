@@ -19,8 +19,8 @@ export async function InvoiceView({ invoice }: { invoice: NonNullable<Awaited<Re
     <div className="card p-8">
       <div className="flex flex-wrap justify-between gap-6">
         <div>
-          <div className="text-xl font-semibold text-brand-700">{s.facilityName}</div>
-          <div className="text-sm text-slate-500">{s.billingEmail}</div>
+          <div className="text-xl font-semibold text-deep-blue">{s.facilityName}</div>
+          <div className="text-sm text-deep-blue">{s.billingEmail}</div>
         </div>
         <div className="text-right">
           <div className="text-2xl font-semibold">Invoice</div>
@@ -35,9 +35,9 @@ export async function InvoiceView({ invoice }: { invoice: NonNullable<Awaited<Re
         <div>
           <div className="label">Bill to</div>
           <div className="font-medium">{invoice.customer.name}</div>
-          {invoice.customer.billingAddress && <div className="whitespace-pre-line text-slate-600">{invoice.customer.billingAddress}</div>}
-          <div className="text-slate-600">{invoice.customer.billingEmail}</div>
-          {invoice.customer.taxId && <div className="text-slate-600">Tax ID: {invoice.customer.taxId}</div>}
+          {invoice.customer.billingAddress && <div className="whitespace-pre-line text-deep-blue">{invoice.customer.billingAddress}</div>}
+          <div className="text-deep-blue">{invoice.customer.billingEmail}</div>
+          {invoice.customer.taxId && <div className="text-deep-blue">Tax ID: {invoice.customer.taxId}</div>}
         </div>
         <div>
           <div className="label">Billing period</div>
@@ -49,7 +49,7 @@ export async function InvoiceView({ invoice }: { invoice: NonNullable<Awaited<Re
           <div className="label">Issued</div>
           <div>{fmtDate(invoice.issuedAt, s.timezone)}</div>
           <div className="mt-2 label">Due</div>
-          <div className={overdue ? "font-medium text-red-700" : ""}>
+          <div className={overdue ? "font-medium font-bold text-deep-blue" : ""}>
             {fmtDate(invoice.dueAt, s.timezone)} {overdue > 0 && `(${overdue} days overdue)`}
           </div>
         </div>
@@ -88,20 +88,20 @@ export async function InvoiceView({ invoice }: { invoice: NonNullable<Awaited<Re
             {invoice.payments.map((p) => (
               <li key={p.id}>
                 {fmtDate(p.receivedAt, s.timezone)} — {m(p.amountCents)} by {p.method.replace("_", " ").toLowerCase()}
-                {p.reference && <span className="text-slate-500"> (ref {p.reference})</span>}
+                {p.reference && <span className="text-deep-blue"> (ref {p.reference})</span>}
               </li>
             ))}
           </ul>
         </div>
       )}
-      <p className="mt-8 border-t border-slate-100 pt-4 text-xs text-slate-500">{s.invoiceFooter}</p>
+      <p className="mt-8 border-t border-canvas pt-4 text-xs text-deep-blue">{s.invoiceFooter}</p>
     </div>
   );
 }
 
 function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
-    <div className={`flex justify-between ${strong ? "border-t border-slate-200 pt-1 font-semibold" : ""}`}>
+    <div className={`flex justify-between ${strong ? "border-t border-canvas pt-1 font-semibold" : ""}`}>
       <span>{label}</span>
       <span className="tabular-nums">{value}</span>
     </div>

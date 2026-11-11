@@ -74,11 +74,11 @@ export default async function BookingsPage({ searchParams }: { searchParams: Pro
                 const canCheckIn = b.status === "CONFIRMED" && now >= addMinutes(b.startsAt, -15) && now < b.endsAt;
                 return (
                   <tr key={b.id}>
-                    <td>{b.equipment.name}<div className="text-xs text-slate-500">{b.purpose}</div></td>
+                    <td>{b.equipment.name}<div className="text-xs text-deep-blue">{b.purpose}</div></td>
                     <td className="whitespace-nowrap">{fmt(b.startsAt, s.timezone, "EEE d MMM, HH:mm")}–{fmt(b.endsAt, s.timezone, "HH:mm")}</td>
                     {company && <td>{b.user.name}</td>}
-                    <td><StatusBadge status={b.status} />{b.autoClosed && <div className="text-xs text-amber-700">auto checked-out</div>}</td>
-                    <td className="text-xs text-slate-600">{b.checkedInAt ? `${fmt(b.checkedInAt, s.timezone, "HH:mm")}–${b.checkedOutAt ? fmt(b.checkedOutAt, s.timezone, "HH:mm") : "…"}` : "—"}</td>
+                    <td><StatusBadge status={b.status} />{b.autoClosed && <div className="text-xs font-bold text-deep-blue">auto checked-out</div>}</td>
+                    <td className="text-xs text-deep-blue">{b.checkedInAt ? `${fmt(b.checkedInAt, s.timezone, "HH:mm")}–${b.checkedOutAt ? fmt(b.checkedOutAt, s.timezone, "HH:mm") : "…"}` : "—"}</td>
                     <td className="text-right">
                       <form action={act} className="inline-flex gap-1">
                         <input type="hidden" name="rid" value={b.id} />

@@ -45,8 +45,8 @@ export default async function UsageReview({ searchParams }: { searchParams: Prom
                 <td>{c.tier.name}</td>
                 <td className="text-right tabular-nums">{live ? live.billableHours : "—"}</td>
                 <td className="text-right tabular-nums">{money(live ? live.totalCents : invoice!.totalCents, s.currency)}</td>
-                <td>{invoice ? <Link className="link" href={`/admin/invoices/${invoice.id}`}><StatusBadge status={invoice.status} /></Link> : <span className="text-xs text-slate-500">not generated</span>}</td>
-                <td className="text-xs text-amber-700">{live?.warnings.join(" ")}</td>
+                <td>{invoice ? <Link className="link" href={`/admin/invoices/${invoice.id}`}><StatusBadge status={invoice.status} /></Link> : <span className="text-xs text-deep-blue">not generated</span>}</td>
+                <td className="text-xs font-bold text-deep-blue">{live?.warnings.join(" ")}</td>
               </tr>
             ))}
           </tbody>

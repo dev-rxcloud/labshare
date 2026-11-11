@@ -57,13 +57,13 @@ export default async function EquipmentAdmin({ searchParams }: { searchParams: P
             <tbody>
               {equipment.map((e) => (
                 <tr key={e.id}>
-                  <td><Link className="link" href={`/admin/equipment/${e.id}`}>{e.name}</Link><div className="text-xs text-slate-500">{e.assetTag} · {e.location}</div></td>
+                  <td><Link className="link" href={`/admin/equipment/${e.id}`}>{e.name}</Link><div className="text-xs text-deep-blue">{e.assetTag} · {e.location}</div></td>
                   <td>{e.category.name}</td>
                   <td className="text-right tabular-nums">{money(e.hourlyRateCents, s.currency)}/h</td>
                   <td className="space-x-1">
-                    {e.restricted ? <Badge tone="red">grant only ({e._count.grants})</Badge> : <Badge>level {e.minTierLevel}+</Badge>}
-                    {e.requiresCertification && <Badge tone="blue">cert ({e._count.certifications})</Badge>}
-                    {e.requiresApproval && <Badge tone="purple">approval</Badge>}
+                    {e.restricted ? <Badge tone="urgent">grant only ({e._count.grants})</Badge> : <Badge>level {e.minTierLevel}+</Badge>}
+                    {e.requiresCertification && <Badge tone="info">cert ({e._count.certifications})</Badge>}
+                    {e.requiresApproval && <Badge tone="live">approval</Badge>}
                   </td>
                   <td><StatusBadge status={e.status} /></td>
                 </tr>
@@ -73,10 +73,10 @@ export default async function EquipmentAdmin({ searchParams }: { searchParams: P
         </Card>
         <div className="space-y-6">
           <Card title="Plans (customer tiers)">
-            <p className="mb-3 text-xs text-slate-500">A plan's level decides which equipment its customers can book (equipment "level N+"). Its discount applies to usage on the invoice.</p>
+            <p className="mb-3 text-xs text-deep-blue">A plan's level decides which equipment its customers can book (equipment "level N+"). Its discount applies to usage on the invoice.</p>
             <div className="space-y-3">
               {[...tiers, null].map((t) => (
-                <form key={t?.id ?? "new"} action={act} className="grid grid-cols-6 gap-1 rounded border border-slate-100 p-2">
+                <form key={t?.id ?? "new"} action={act} className="grid grid-cols-6 gap-1 rounded border border-canvas p-2">
                   <input type="hidden" name="op" value="tier" />
                   <input type="hidden" name="tierId" value={t?.id ?? ""} />
                   <input className="input col-span-3" name="name" defaultValue={t?.name} placeholder="New plan" required disabled={!isAdmin} />
@@ -84,7 +84,7 @@ export default async function EquipmentAdmin({ searchParams }: { searchParams: P
                   <input className="input col-span-2" name="discount" defaultValue={t ? Number(t.discountPercent) : 0} title="Discount %" disabled={!isAdmin} />
                   <input className="input col-span-4" name="description" defaultValue={t?.description ?? ""} placeholder="Description" disabled={!isAdmin} />
                   {isAdmin && <button className="btn-secondary col-span-2">{t ? "Save" : "Add"}</button>}
-                  {t && <div className="col-span-6 text-xs text-slate-500">{t._count.customers} customer(s)</div>}
+                  {t && <div className="col-span-6 text-xs text-deep-blue">{t._count.customers} customer(s)</div>}
                 </form>
               ))}
             </div>

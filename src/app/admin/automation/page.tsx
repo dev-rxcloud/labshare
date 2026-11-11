@@ -39,16 +39,16 @@ export default async function AutomationPage({ searchParams }: { searchParams: P
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title="Active rules (edit in Settings)">
           <dl className="space-y-3 text-sm">
-            {rules.map(([k, v]) => <div key={k}><dt className="font-medium">{k}</dt><dd className="text-slate-600">{v}</dd></div>)}
+            {rules.map(([k, v]) => <div key={k}><dt className="font-medium">{k}</dt><dd className="text-deep-blue">{v}</dd></div>)}
           </dl>
         </Card>
         <Card title="Recent runs">
           {runs.length === 0 ? <Empty>No runs yet.</Empty> : (
             <ul className="space-y-2 text-xs">
               {runs.map((r) => (
-                <li key={r.id} className="rounded border border-slate-100 p-2">
+                <li key={r.id} className="rounded border border-canvas p-2">
                   <div className="mb-1 flex justify-between"><span className="font-medium">{fmt(r.startedAt, s.timezone)}</span><StatusBadge status={r.ok ? "COMPLETED" : r.ok === false ? "NO_SHOW" : "CONFIRMED"} /></div>
-                  <pre className="overflow-x-auto whitespace-pre-wrap text-slate-600">{JSON.stringify(r.summary)}</pre>
+                  <pre className="overflow-x-auto whitespace-pre-wrap text-deep-blue">{JSON.stringify(r.summary)}</pre>
                 </li>
               ))}
             </ul>
@@ -64,7 +64,7 @@ export default async function AutomationPage({ searchParams }: { searchParams: P
                     <td className="whitespace-nowrap">{fmt(e.sentAt, s.timezone, "d MMM HH:mm")}</td>
                     <td className="text-xs">{e.kind}</td>
                     <td className="text-xs">{e.to}</td>
-                    <td><details><summary className="cursor-pointer">{e.subject}</summary><pre className="mt-2 whitespace-pre-wrap text-xs text-slate-600">{e.body}</pre></details></td>
+                    <td><details><summary className="cursor-pointer">{e.subject}</summary><pre className="mt-2 whitespace-pre-wrap text-xs text-deep-blue">{e.body}</pre></details></td>
                     <td className="text-xs">{e.status}</td>
                   </tr>
                 ))}

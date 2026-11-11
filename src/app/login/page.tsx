@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createSession, currentUser, isFacility, verifyCredentials } from "@/lib/auth";
-import { Flash } from "@/components/ui";
+import { Flash, Logo } from "@/components/ui";
 
 async function login(fd: FormData) {
   "use server";
@@ -17,8 +17,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <h1 className="mb-1 text-2xl font-semibold text-brand-700">LabShare</h1>
-        <p className="mb-6 text-sm text-slate-500">Book shared lab equipment. Usage-based billing, automated.</p>
+        <div className="mb-6"><Logo width={240} /></div>
+        <h1 className="headline mb-1">LabShare</h1>
+        <p className="mb-6 text-sm font-medium">Book shared lab equipment. Usage-based billing, automated.</p>
         <Flash searchParams={sp} />
         <form action={login} className="card space-y-4 p-6">
           <div>
@@ -32,7 +33,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           <button className="btn-primary w-full">Sign in</button>
         </form>
         {process.env.NODE_ENV !== "production" && (
-          <p className="mt-4 text-xs text-slate-500">
+          <p className="mt-4 text-xs text-deep-blue">
             Demo: admin@facility.test, lead@helixbio.test, scientist@novatx.test — password <code>password123</code>
           </p>
         )}

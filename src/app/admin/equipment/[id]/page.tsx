@@ -78,10 +78,10 @@ export default async function EquipmentDetail({ params, searchParams }: { params
   const isAdmin = user.role === "FACILITY_ADMIN";
   const hidden = <input type="hidden" name="equipmentId" value={e.id} />;
   const num = (label: string, name: keyof typeof e, hint?: string) => (
-    <div><label className="label">{label}</label><input className="input" type="number" name={name} defaultValue={String(e[name])} />{hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}</div>
+    <div><label className="label">{label}</label><input className="input" type="number" name={name} defaultValue={String(e[name])} />{hint && <p className="mt-1 text-xs text-deep-blue">{hint}</p>}</div>
   );
   const check = (label: string, name: "restricted" | "requiresCertification" | "requiresApproval", hint: string) => (
-    <label className="flex items-start gap-2 text-sm"><input type="checkbox" name={name} defaultChecked={e[name]} className="mt-0.5" /><span><span className="font-medium">{label}</span><span className="block text-xs text-slate-500">{hint}</span></span></label>
+    <label className="flex items-start gap-2 text-sm"><input type="checkbox" name={name} defaultChecked={e[name]} className="mt-0.5" /><span><span className="font-medium">{label}</span><span className="block text-xs text-deep-blue">{hint}</span></span></label>
   );
 
   return (
@@ -123,12 +123,12 @@ export default async function EquipmentDetail({ params, searchParams }: { params
                 const clash = upcoming.filter((b) => overlaps(b.startsAt, b.endsAt, m.startsAt, m.endsAt)).length;
                 return (
                   <li key={m.id} className="flex items-start justify-between gap-2">
-                    <span>{fmt(m.startsAt, s.timezone)} → {fmt(m.endsAt, s.timezone)}<span className="block text-xs text-slate-500">{m.reason}{clash ? ` · ⚠ overlaps ${clash} booking(s)` : ""}</span></span>
-                    <form action={act}>{hidden}<input type="hidden" name="windowId" value={m.id} /><button name="op" value="delete-maintenance" className="text-xs text-red-600">remove</button></form>
+                    <span>{fmt(m.startsAt, s.timezone)} → {fmt(m.endsAt, s.timezone)}<span className="block text-xs font-medium">{m.reason}{clash ? ` · Check: overlaps ${clash} booking(s)` : ""}</span></span>
+                    <form action={act}>{hidden}<input type="hidden" name="windowId" value={m.id} /><button name="op" value="delete-maintenance" className="text-xs font-bold text-deep-blue">remove</button></form>
                   </li>
                 );
               })}
-              {e.maintenance.length === 0 && <li className="text-slate-500">None scheduled.</li>}
+              {e.maintenance.length === 0 && <li className="text-deep-blue">None scheduled.</li>}
             </ul>
             <form action={act} className="grid grid-cols-2 gap-2">
               {hidden}
@@ -143,7 +143,7 @@ export default async function EquipmentDetail({ params, searchParams }: { params
           <Card title="Upcoming bookings">
             <ul className="space-y-1 text-sm">
               {upcoming.map((b) => <li key={b.id}>{fmt(b.startsAt, s.timezone, "EEE d MMM HH:mm")}–{fmt(b.endsAt, s.timezone, "HH:mm")} · {b.customer.name}</li>)}
-              {upcoming.length === 0 && <li className="text-slate-500">None.</li>}
+              {upcoming.length === 0 && <li className="text-deep-blue">None.</li>}
             </ul>
           </Card>
         </div>

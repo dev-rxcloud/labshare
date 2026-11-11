@@ -70,8 +70,8 @@ export default async function AdminInvoice({ params, searchParams }: { params: P
       />
       <Flash searchParams={sp} />
       {invoice.status === "DRAFT" && invoice.warnings.length > 0 && (
-        <ul className="mb-4 space-y-1 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          {invoice.warnings.map((w) => <li key={w}>⚠ {w}</li>)}
+        <ul className="notice-problem mb-4 space-y-1">
+          {invoice.warnings.map((w) => <li key={w}>Check: {w}</li>)}
         </ul>
       )}
       <div className="grid gap-6 lg:grid-cols-3">
@@ -79,7 +79,7 @@ export default async function AdminInvoice({ params, searchParams }: { params: P
         <div className="no-print space-y-6">
           {invoice.status === "DRAFT" && (
             <Card title="Review draft">
-              <p className="mb-3 text-sm text-slate-600">Check the lines, correct usage or add adjustments on the customer page, then recalculate. Issuing emails the invoice and starts the payment clock.</p>
+              <p className="mb-3 text-sm text-deep-blue">Check the lines, correct usage or add adjustments on the customer page, then recalculate. Issuing emails the invoice and starts the payment clock.</p>
               <div className="flex flex-wrap gap-2">
                 <form action={act}><input type="hidden" name="rid" value={invoice.id} /><button name="op" value="issue" className="btn-primary">Issue & email</button></form>
                 <form action={act}><input type="hidden" name="rid" value={invoice.id} /><button name="op" value="regenerate" className="btn-secondary">Recalculate</button></form>
@@ -112,7 +112,7 @@ export default async function AdminInvoice({ params, searchParams }: { params: P
             </Card>
           )}
           <Card title="Emails">
-            {emails.length === 0 ? <p className="text-sm text-slate-500">None yet.</p> : (
+            {emails.length === 0 ? <p className="text-sm text-deep-blue">None yet.</p> : (
               <ul className="space-y-1 text-xs">{emails.map((e) => <li key={e.id}>{fmt(e.sentAt, s.timezone, "d MMM HH:mm")} · {e.kind} · {e.status}</li>)}</ul>
             )}
           </Card>

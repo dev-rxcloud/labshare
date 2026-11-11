@@ -1,27 +1,52 @@
 @import "tailwindcss";
 
+/*
+ * RxCloud Design System (organisation default): https://claude.ai/artifact/GABMgKiqtJrEfmogUm9Cck
+ * Colours come ONLY from its tokens.json. Tailwind's default palette is removed below, so any
+ * colour class outside these tokens produces no CSS at all. No tints, gradients, opacity or shadows.
+ */
 @theme {
-  --color-brand-50: #eef6ff;
-  --color-brand-100: #d9eaff;
-  --color-brand-500: #2f6fe4;
-  --color-brand-600: #1f5ad0;
-  --color-brand-700: #1a48a6;
+  --color-*: initial;
+  --color-deep-blue: #244065;          /* text, primary actions, solid bars */
+  --color-forest-green: #009681;       /* borders, bars, rules, large bold text only */
+  --color-forest-green-text: #007464;  /* small green text (pending brand-owner approval) */
+  --color-secondary-aqua: #89D2D6;     /* large fields, info badges */
+  --color-secondary-yellow: #FFF086;   /* small accent fields: attention badges */
+  --color-secondary-grey: #E4E5EE;     /* cards and panels */
+  --color-canvas: #FBFBF9;             /* page ground; text on deep-blue */
+
+  --font-sans: var(--font-quicksand), "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-playfair), Georgia, serif;
+
+  --shadow-*: initial;
 }
 
-body { @apply bg-slate-50 text-slate-900 antialiased; }
-.btn-primary { @apply inline-flex items-center justify-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 cursor-pointer bg-brand-600 text-white hover:bg-brand-700; }
-.btn-secondary { @apply inline-flex items-center justify-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 cursor-pointer border border-slate-300 bg-white text-slate-700 hover:bg-slate-100; }
-.btn-danger { @apply inline-flex items-center justify-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium transition disabled:opacity-50 cursor-pointer border border-red-200 bg-white text-red-700 hover:bg-red-50; }
-.input { @apply w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-100; }
-.label { @apply mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500; }
-.card { @apply rounded-lg border border-slate-200 bg-white shadow-sm; }
+body { @apply bg-canvas font-sans font-medium text-deep-blue antialiased; }
+
+/* Page headline: the single Playfair Display Bold element per screen. */
+.headline { @apply font-display text-3xl font-bold tracking-tight text-deep-blue; }
+
+.btn-primary { @apply inline-flex cursor-pointer items-center justify-center gap-1 rounded-md border-2 border-deep-blue bg-deep-blue px-3 py-1.5 text-sm font-bold text-canvas transition hover:border-forest-green-text hover:bg-forest-green-text disabled:cursor-not-allowed disabled:border-secondary-grey disabled:bg-secondary-grey disabled:text-deep-blue; }
+.btn-secondary { @apply inline-flex cursor-pointer items-center justify-center gap-1 rounded-md border border-deep-blue bg-canvas px-3 py-1.5 text-sm font-bold text-deep-blue transition hover:bg-secondary-aqua disabled:cursor-not-allowed; }
+/* No red exists in the brand palette: destructive actions are distinguished by a heavier outline and their label. */
+.btn-danger { @apply inline-flex cursor-pointer items-center justify-center gap-1 rounded-md border-2 border-deep-blue bg-canvas px-3 py-1.5 text-sm font-bold text-deep-blue transition hover:bg-secondary-yellow; }
+
+.input { @apply w-full rounded-md border border-deep-blue bg-canvas px-2.5 py-1.5 text-sm font-medium text-deep-blue focus:outline-none focus:ring-2 focus:ring-forest-green disabled:border-secondary-grey; }
+.input::placeholder { color: var(--color-deep-blue); font-weight: 400; font-style: italic; }
+.label { @apply mb-1 block text-xs font-bold uppercase tracking-[0.08em] text-deep-blue; }
+.muted { @apply text-xs font-medium text-deep-blue; }
+
+.card { @apply rounded-lg bg-secondary-grey; }
 .table { @apply w-full text-sm; }
-.table th { @apply border-b border-slate-200 bg-slate-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500; }
-.table td { @apply border-b border-slate-100 px-3 py-2 align-top; }
-.link { @apply text-brand-600 hover:underline; }
+.table th { @apply border-b-2 border-forest-green px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.08em] text-deep-blue; }
+.table td { @apply border-b-2 border-canvas px-3 py-2 align-top; }
+.link { @apply font-bold text-deep-blue underline decoration-forest-green decoration-2 underline-offset-4 hover:decoration-deep-blue; }
+
+/* Notices: success = Forest Green rule; problem = Secondary Yellow field with a Deep Blue rule. */
+.notice-ok { @apply rounded-md border-2 border-forest-green bg-canvas px-4 py-3 text-sm font-semibold text-deep-blue; }
+.notice-problem { @apply rounded-md border-2 border-deep-blue bg-secondary-yellow px-4 py-3 text-sm font-semibold text-deep-blue; }
 
 @media print {
   .no-print { display: none !important; }
-  body { background: white; }
-  .card { box-shadow: none; border: none; }
+  .card { background: var(--color-canvas); }
 }

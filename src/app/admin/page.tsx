@@ -44,19 +44,19 @@ export default async function AdminHome() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card title="Awaiting approval" actions={<Link href="/admin/bookings?status=PENDING_APPROVAL" className="link text-sm">Review</Link>}>
           {pending.length === 0 ? <Empty>Nothing to approve.</Empty> : (
-            <ul className="divide-y divide-slate-100 text-sm">
+            <ul className="divide-y divide-canvas text-sm">
               {pending.map((b) => (
-                <li key={b.id} className="py-2"><span className="font-medium">{b.equipment.name}</span> · {b.customer.name} ({b.user.name})<div className="text-xs text-slate-500">{fmt(b.startsAt, s.timezone)}–{fmt(b.endsAt, s.timezone, "HH:mm")}</div></li>
+                <li key={b.id} className="py-2"><span className="font-medium">{b.equipment.name}</span> · {b.customer.name} ({b.user.name})<div className="text-xs text-deep-blue">{fmt(b.startsAt, s.timezone)}–{fmt(b.endsAt, s.timezone, "HH:mm")}</div></li>
               ))}
             </ul>
           )}
         </Card>
         <Card title="Next 24 hours">
           {today.length === 0 ? <Empty>No sessions scheduled.</Empty> : (
-            <ul className="divide-y divide-slate-100 text-sm">
+            <ul className="divide-y divide-canvas text-sm">
               {today.map((b) => (
                 <li key={b.id} className="flex items-center justify-between py-2">
-                  <div><span className="font-medium">{b.equipment.name}</span> · {b.customer.name}<div className="text-xs text-slate-500">{fmt(b.startsAt, s.timezone, "EEE HH:mm")}–{fmt(b.endsAt, s.timezone, "HH:mm")} · {b.user.name}</div></div>
+                  <div><span className="font-medium">{b.equipment.name}</span> · {b.customer.name}<div className="text-xs text-deep-blue">{fmt(b.startsAt, s.timezone, "EEE HH:mm")}–{fmt(b.endsAt, s.timezone, "HH:mm")} · {b.user.name}</div></div>
                   <StatusBadge status={b.status} />
                 </li>
               ))}
@@ -66,7 +66,7 @@ export default async function AdminHome() {
         {isAdmin && (
           <Card title="Overdue invoices" actions={<Link href="/admin/invoices?status=OVERDUE" className="link text-sm">All</Link>}>
             {overdue.length === 0 ? <Empty>Nothing overdue.</Empty> : (
-              <ul className="divide-y divide-slate-100 text-sm">
+              <ul className="divide-y divide-canvas text-sm">
                 {overdue.map((i) => (
                   <li key={i.id} className="flex justify-between py-2"><Link className="link" href={`/admin/invoices/${i.id}`}>{i.number} · {i.customer.name}</Link><span className="tabular-nums">{money(i.totalCents - i.paidCents, i.currency)}</span></li>
                 ))}
@@ -76,7 +76,7 @@ export default async function AdminHome() {
         )}
         {isAdmin && (
           <Card title="Automation" actions={<Link href="/admin/automation" className="link text-sm">Details</Link>}>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-deep-blue">
               {lastRun ? <>Last run {fmt(lastRun.startedAt, s.timezone)} — {lastRun.ok ? "succeeded" : lastRun.ok === false ? "had errors" : "running"}.</> : "Automation has not run yet. Schedule /api/cron/run hourly."}
             </p>
           </Card>

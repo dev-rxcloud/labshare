@@ -26,7 +26,7 @@ export default async function EquipmentCatalog() {
       <div className="space-y-8">
         {[...groups].map(([category, items]) => (
           <section key={category}>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">{category}</h2>
+            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-deep-blue">{category}</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((e) => {
                 const cert = certs.find((c) => c.equipmentId === e.id);
@@ -44,21 +44,21 @@ export default async function EquipmentCatalog() {
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <div className="font-medium">{e.name}</div>
-                        <div className="text-xs text-slate-500">{e.location} · {e.assetTag}</div>
+                        <div className="text-xs text-deep-blue">{e.location} · {e.assetTag}</div>
                       </div>
-                      <div className="text-right text-sm font-semibold tabular-nums">{money(rate, s.currency)}<span className="text-xs font-normal text-slate-500">/h</span></div>
+                      <div className="text-right text-sm font-semibold tabular-nums">{money(rate, s.currency)}<span className="text-xs font-normal text-deep-blue">/h</span></div>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-1">
-                      {e.status === "MAINTENANCE" && <Badge tone="amber">maintenance</Badge>}
-                      {e.requiresCertification && <Badge tone={cert ? "green" : "gray"}>{cert ? "certified" : "training required"}</Badge>}
-                      {e.requiresApproval && <Badge tone="purple">needs approval</Badge>}
-                      {e.restricted && <Badge tone="red">restricted</Badge>}
+                      {e.status === "MAINTENANCE" && <Badge tone="attention">maintenance</Badge>}
+                      {e.requiresCertification && <Badge tone={cert ? "good" : "neutral"}>{cert ? "certified" : "training required"}</Badge>}
+                      {e.requiresApproval && <Badge tone="live">needs approval</Badge>}
+                      {e.restricted && <Badge tone="urgent">restricted</Badge>}
                     </div>
                     <div className="mt-auto pt-4">
                       {access.allowed ? (
                         <Link href={`/portal/equipment/${e.id}`} className="btn-primary w-full">Check availability</Link>
                       ) : (
-                        <div className="rounded-md bg-slate-50 px-3 py-2 text-xs text-slate-600">{access.message}</div>
+                        <div className="rounded-md bg-canvas px-3 py-2 text-xs text-deep-blue">{access.message}</div>
                       )}
                     </div>
                   </div>

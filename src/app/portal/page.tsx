@@ -46,7 +46,7 @@ export default async function PortalHome() {
             <tbody>
               {upcoming.map((b) => (
                 <tr key={b.id}>
-                  <td>{b.equipment.name}<div className="text-xs text-slate-500">{b.equipment.location}</div></td>
+                  <td>{b.equipment.name}<div className="text-xs text-deep-blue">{b.equipment.location}</div></td>
                   <td>{fmt(b.startsAt, s.timezone, "EEE d MMM, HH:mm")}–{fmt(b.endsAt, s.timezone, "HH:mm")}</td>
                   <td><StatusBadge status={b.status} /></td>
                 </tr>

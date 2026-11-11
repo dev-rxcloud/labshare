@@ -52,7 +52,7 @@ function Field({ label, name, value, type = "text", hint, step }: { label: strin
     <div>
       <label className="label" htmlFor={name}>{label}</label>
       <input className="input" id={name} name={name} type={type} defaultValue={value} step={step} />
-      {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
+      {hint && <p className="mt-1 text-xs text-deep-blue">{hint}</p>}
     </div>
   );
 }
@@ -61,7 +61,7 @@ function Toggle({ label, name, checked, hint }: { label: string; name: string; c
   return (
     <label className="flex items-start gap-2 text-sm">
       <input type="checkbox" name={name} defaultChecked={checked} className="mt-0.5" />
-      <span><span className="font-medium">{label}</span>{hint && <span className="block text-xs text-slate-500">{hint}</span>}</span>
+      <span><span className="font-medium">{label}</span>{hint && <span className="block text-xs text-deep-blue">{hint}</span>}</span>
     </label>
   );
 }

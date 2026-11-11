@@ -7,8 +7,8 @@ export function StatementTable({ statement, currency }: { statement: Statement; 
   return (
     <>
       {statement.warnings.length > 0 && (
-        <ul className="mb-3 space-y-1 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          {statement.warnings.map((w) => <li key={w}>⚠ {w}</li>)}
+        <ul className="notice-problem mb-3 space-y-1 text-xs">
+          {statement.warnings.map((w) => <li key={w}>Check: {w}</li>)}
         </ul>
       )}
       <table className="table">
@@ -18,14 +18,14 @@ export function StatementTable({ statement, currency }: { statement: Statement; 
             <tr key={i}>
               <td>
                 {l.description}
-                {l.flags?.filter((f) => f !== "overrun").map((f) => <span key={f} className="ml-1"><Badge tone="amber">{f}</Badge></span>)}
+                {l.flags?.filter((f) => f !== "overrun").map((f) => <span key={f} className="ml-1"><Badge tone="attention">{f}</Badge></span>)}
               </td>
               <td className="text-right tabular-nums">{l.quantity}</td>
               <td className="text-right tabular-nums">{m(l.unitCents)}</td>
               <td className="text-right tabular-nums">{m(l.amountCents)}</td>
             </tr>
           ))}
-          {statement.lines.length === 0 && <tr><td colSpan={4} className="py-6 text-center text-slate-500">No billable usage.</td></tr>}
+          {statement.lines.length === 0 && <tr><td colSpan={4} className="py-6 text-center text-deep-blue">No billable usage.</td></tr>}
         </tbody>
         <tfoot className="text-sm">
           <tr><td colSpan={3} className="text-right">Subtotal</td><td className="text-right tabular-nums">{m(statement.subtotalCents)}</td></tr>

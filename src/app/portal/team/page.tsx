@@ -57,12 +57,12 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
             <thead><tr><th>Name</th><th>Role</th><th>Certifications</th><th /></tr></thead>
             <tbody>
               {members.map((m) => (
-                <tr key={m.id} className={m.active ? "" : "opacity-50"}>
-                  <td>{m.name}<div className="text-xs text-slate-500">{m.email}</div></td>
+                <tr key={m.id} className={m.active ? "" : "italic"}>
+                  <td>{m.name}<div className="text-xs text-deep-blue">{m.email}</div></td>
                   <td>{m.role === "CUSTOMER_ADMIN" ? "Admin" : "Member"}</td>
                   <td className="space-x-1">
                     {m.certifications.map((c) => (
-                      <Badge key={c.id} tone={c.expiresAt && c.expiresAt < new Date() ? "red" : "green"}>
+                      <Badge key={c.id} tone={c.expiresAt && c.expiresAt < new Date() ? "urgent" : "good"}>
                         {c.equipment.name}{c.expiresAt ? ` · until ${fmtDate(c.expiresAt, s.timezone)}` : ""}
                       </Badge>
                     ))}

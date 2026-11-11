@@ -72,7 +72,7 @@ export default async function EquipmentPage({ params, searchParams }: { params: 
         actions={<Link href="/portal/equipment" className="btn-secondary">All equipment</Link>}
       />
       <Flash searchParams={sp} />
-      {equipment.description && <p className="mb-4 text-sm text-slate-600">{equipment.description}</p>}
+      {equipment.description && <p className="mb-4 text-sm text-deep-blue">{equipment.description}</p>}
       <div className="grid gap-6 lg:grid-cols-3">
         <Card
           className="lg:col-span-2"
@@ -85,36 +85,34 @@ export default async function EquipmentPage({ params, searchParams }: { params: 
             </div>
           }
         >
-          <div className="relative mt-6 h-14 rounded-md bg-emerald-50 ring-1 ring-emerald-200">
+          <div className="relative mt-6 h-14 rounded-md border border-deep-blue bg-canvas">
             {Array.from({ length: toH - fromH + 1 }, (_, i) => fromH + i).map((h) => (
-              <div key={h} className="absolute top-0 h-full border-l border-emerald-200/70" style={{ left: `${((h - fromH) / (toH - fromH)) * 100}%` }}>
-                <span className="absolute -top-5 -translate-x-1/2 text-[10px] text-slate-400">{h}</span>
+              <div key={h} className="absolute top-0 h-full border-l border-secondary-grey" style={{ left: `${((h - fromH) / (toH - fromH)) * 100}%` }}>
+                <span className="absolute -top-5 -translate-x-1/2 text-[11px] font-bold text-deep-blue">{h}</span>
               </div>
             ))}
             {bookings.map((b) => (
               <div
                 key={b.id}
                 title={`${fmt(b.startsAt, s.timezone, "HH:mm")}–${fmt(b.endsAt, s.timezone, "HH:mm")}`}
-                className={`absolute top-1 bottom-1 rounded px-1 text-[10px] leading-tight text-white ${b.customerId === user.customer.id ? "bg-brand-600" : "bg-slate-500"}`}
+                aria-label={b.customerId === user.customer.id ? "Your organisation" : "Booked"}
+                className={`absolute top-1 bottom-1 rounded ${b.customerId === user.customer.id ? "bg-forest-green" : "bg-deep-blue"}`}
                 style={{ left: `${pos(b.startsAt)}%`, width: `${Math.max(0.5, pos(b.endsAt) - pos(b.startsAt))}%` }}
-              >
-                {b.customerId === user.customer.id ? "Yours" : "Booked"}
-              </div>
+              />
             ))}
             {maintenance.map((m) => (
-              <div key={m.id} className="absolute top-1 bottom-1 rounded bg-amber-400/80 px-1 text-[10px] text-amber-950" style={{ left: `${pos(m.startsAt)}%`, width: `${pos(m.endsAt) - pos(m.startsAt)}%` }}>
-                Maintenance
-              </div>
+              <div key={m.id} title="Maintenance" className="absolute top-1 bottom-1 rounded border-2 border-deep-blue bg-secondary-yellow" style={{ left: `${pos(m.startsAt)}%`, width: `${pos(m.endsAt) - pos(m.startsAt)}%` }}/>
             ))}
           </div>
-          <div className="mt-3 flex gap-4 text-xs text-slate-500">
-            <span><span className="mr-1 inline-block h-2 w-2 rounded bg-emerald-200" />free</span>
-            <span><span className="mr-1 inline-block h-2 w-2 rounded bg-slate-500" />booked</span>
-            <span><span className="mr-1 inline-block h-2 w-2 rounded bg-brand-600" />your organisation</span>
+          <div className="mt-3 flex gap-4 text-xs text-deep-blue">
+            <span><span className="mr-1 inline-block h-3 w-3 rounded border border-deep-blue bg-canvas align-middle" />free</span>
+            <span><span className="mr-1 inline-block h-3 w-3 rounded bg-deep-blue align-middle" />booked</span>
+            <span><span className="mr-1 inline-block h-3 w-3 rounded border-2 border-deep-blue bg-secondary-yellow align-middle" />maintenance</span>
+            <span><span className="mr-1 inline-block h-3 w-3 rounded bg-forest-green align-middle" />your organisation</span>
             {equipment.bufferMinutes > 0 && <span>{equipment.bufferMinutes} min cleanup is kept free between bookings</span>}
           </div>
           {bookings.length > 0 && (
-            <ul className="mt-4 space-y-1 text-sm text-slate-600">
+            <ul className="mt-4 space-y-1 text-sm text-deep-blue">
               {bookings.map((b) => (
                 <li key={b.id}>{fmt(b.startsAt, s.timezone, "HH:mm")}–{fmt(b.endsAt, s.timezone, "HH:mm")} · {b.customerId === user.customer.id ? "your organisation" : "booked"}</li>
               ))}
@@ -123,7 +121,7 @@ export default async function EquipmentPage({ params, searchParams }: { params: 
         </Card>
         <Card title="Book a slot">
           {!access.allowed ? (
-            <p className="text-sm text-slate-600">{access.message}</p>
+            <p className="text-sm text-deep-blue">{access.message}</p>
           ) : (
             <form action={book} className="space-y-3">
               <input type="hidden" name="equipmentId" value={equipment.id} />
@@ -150,7 +148,7 @@ export default async function EquipmentPage({ params, searchParams }: { params: 
                 <input className="input" name="purpose" placeholder="Project / experiment" />
               </div>
               <button className="btn-primary w-full">{equipment.requiresApproval ? "Request booking" : "Book"}</button>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-deep-blue">
                 You are billed for actual use (check-in to check-out), never less than the booked slot. Cancelling less than {s.lateCancelWindowHours}h before start costs {s.lateCancelFeePercent}% of the slot; no-shows cost {s.noShowFeePercent}%.
               </p>
             </form>

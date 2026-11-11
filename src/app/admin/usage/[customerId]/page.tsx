@@ -112,7 +112,7 @@ export default async function CustomerUsage({ params, searchParams }: { params: 
                 <li key={a.id} className="flex items-center justify-between gap-2">
                   <span>{a.description}</span>
                   <span className="flex items-center gap-2 tabular-nums">{money(a.amountCents, s.currency)}
-                    {!a.invoiceLineId && <form action={act}>{hidden}<input type="hidden" name="adjustmentId" value={a.id} /><button name="op" value="delete-adjustment" className="text-xs text-red-600">remove</button></form>}
+                    {!a.invoiceLineId && <form action={act}>{hidden}<input type="hidden" name="adjustmentId" value={a.id} /><button name="op" value="delete-adjustment" className="text-xs font-bold text-deep-blue">remove</button></form>}
                   </span>
                 </li>
               ))}
@@ -128,7 +128,7 @@ export default async function CustomerUsage({ params, searchParams }: { params: 
                   <td>{b.equipment.name}</td>
                   <td>{b.user.name}</td>
                   <td className="whitespace-nowrap">{fmt(b.startsAt, s.timezone, "d MMM HH:mm")}–{fmt(b.endsAt, s.timezone, "HH:mm")}</td>
-                  <td><StatusBadge status={b.status} />{b.autoClosed && <div className="text-xs text-amber-700">auto-closed</div>}{b.invoiceLineId && <div className="text-xs text-slate-500">invoiced</div>}</td>
+                  <td><StatusBadge status={b.status} />{b.autoClosed && <div className="text-xs font-bold text-deep-blue">auto-closed</div>}{b.invoiceLineId && <div className="text-xs text-deep-blue">invoiced</div>}</td>
                   <td>
                     {["COMPLETED", "CHECKED_IN", "NO_SHOW"].includes(b.status) && !b.invoiceLineId ? (
                       <form action={act} className="flex items-center gap-1">
@@ -141,7 +141,7 @@ export default async function CustomerUsage({ params, searchParams }: { params: 
                         <button name="op" value="times" className="btn-secondary">Save</button>
                       </form>
                     ) : (
-                      <span className="text-xs text-slate-600">{b.checkedInAt ? `${fmt(b.checkedInAt, s.timezone, "HH:mm")}–${fmt(b.checkedOutAt, s.timezone, "HH:mm")}` : "—"}</span>
+                      <span className="text-xs text-deep-blue">{b.checkedInAt ? `${fmt(b.checkedInAt, s.timezone, "HH:mm")}–${fmt(b.checkedOutAt, s.timezone, "HH:mm")}` : "—"}</span>
                     )}
                   </td>
                 </tr>

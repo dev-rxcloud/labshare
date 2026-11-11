@@ -81,9 +81,9 @@ export default async function AdminBookings({ searchParams }: { searchParams: Pr
                 <tr key={b.id}>
                   <td className="whitespace-nowrap">{fmt(b.startsAt, s.timezone, "EEE d MMM HH:mm")}–{fmt(b.endsAt, s.timezone, "HH:mm")}</td>
                   <td>{b.equipment.name}</td>
-                  <td>{b.customer.name}<div className="text-xs text-slate-500">{b.user.name}{b.purpose ? ` · ${b.purpose}` : ""}</div></td>
-                  <td><StatusBadge status={b.status} />{b.invoiceLineId && <div className="text-xs text-slate-500">invoiced</div>}</td>
-                  <td className="text-xs text-slate-600">{b.checkedInAt ? `${fmt(b.checkedInAt, s.timezone, "HH:mm")}–${b.checkedOutAt ? fmt(b.checkedOutAt, s.timezone, "HH:mm") : "…"}` : "—"}</td>
+                  <td>{b.customer.name}<div className="text-xs text-deep-blue">{b.user.name}{b.purpose ? ` · ${b.purpose}` : ""}</div></td>
+                  <td><StatusBadge status={b.status} />{b.invoiceLineId && <div className="text-xs text-deep-blue">invoiced</div>}</td>
+                  <td className="text-xs text-deep-blue">{b.checkedInAt ? `${fmt(b.checkedInAt, s.timezone, "HH:mm")}–${b.checkedOutAt ? fmt(b.checkedOutAt, s.timezone, "HH:mm") : "…"}` : "—"}</td>
                   <td>
                     {!b.invoiceLineId && (
                       <div className="flex flex-wrap justify-end gap-1">

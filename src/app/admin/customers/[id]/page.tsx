@@ -126,7 +126,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
     <>
       <PageHeader
         title={customer.name}
-        subtitle={<><StatusBadge status={customer.status} /> {customer.suspendedReason && <span className="ml-2 text-red-700">{customer.suspendedReason}</span>}</>}
+        subtitle={<><StatusBadge status={customer.status} /> {customer.suspendedReason && <span className="ml-2 font-bold text-deep-blue">{customer.suspendedReason}</span>}</>}
         actions={<><Link className="btn-secondary" href={`/admin/usage/${customer.id}`}>Usage</Link><Link className="btn-secondary" href={`/admin/bookings?customerId=${customer.id}`}>Bookings</Link></>}
       />
       <Flash searchParams={sp} />
@@ -173,15 +173,15 @@ export default async function CustomerDetail({ params, searchParams }: { params:
               <thead><tr><th>User</th><th>Certifications</th></tr></thead>
               <tbody>
                 {customer.users.map((u) => (
-                  <tr key={u.id} className={u.active ? "" : "opacity-50"}>
-                    <td>{u.name}<div className="text-xs text-slate-500">{u.email} · {u.role === "CUSTOMER_ADMIN" ? "admin" : "member"}</div></td>
+                  <tr key={u.id} className={u.active ? "" : "italic"}>
+                    <td>{u.name}<div className="text-xs text-deep-blue">{u.email} · {u.role === "CUSTOMER_ADMIN" ? "admin" : "member"}</div></td>
                     <td>
                       <div className="flex flex-wrap gap-1">
                         {u.certifications.map((c) => (
                           <form action={act} key={c.id} className="inline">
                             {hidden}<input type="hidden" name="certId" value={c.id} />
                             <button name="op" value="revoke-cert" title="Revoke">
-                              <Badge tone={c.expiresAt && c.expiresAt < new Date() ? "red" : "green"}>{c.equipment.name}{c.expiresAt ? ` · ${fmtDate(c.expiresAt, s.timezone)}` : ""} ×</Badge>
+                              <Badge tone={c.expiresAt && c.expiresAt < new Date() ? "urgent" : "good"}>{c.equipment.name}{c.expiresAt ? ` · ${fmtDate(c.expiresAt, s.timezone)}` : ""} ×</Badge>
                             </button>
                           </form>
                         ))}
@@ -198,7 +198,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
               </tbody>
             </table>
             {isAdmin && (
-              <form action={act} className="mt-4 grid gap-2 border-t border-slate-100 pt-4 sm:grid-cols-5">
+              <form action={act} className="mt-4 grid gap-2 border-t border-canvas pt-4 sm:grid-cols-5">
                 {hidden}
                 <input className="input" name="name" placeholder="Name" required />
                 <input className="input" name="email" type="email" placeholder="Email" required />
@@ -210,12 +210,12 @@ export default async function CustomerDetail({ params, searchParams }: { params:
           </Card>
 
           <Card title="Equipment access">
-            <p className="mb-3 text-sm text-slate-600">
+            <p className="mb-3 text-sm text-deep-blue">
               The {customer.tier.name} plan (level {customer.tier.level}) gives access to {accessible.length} of {equipment.length} instruments. Grants unlock restricted or higher-level equipment for this customer only.
             </p>
             <div className="mb-3 flex flex-wrap gap-1">
               {customer.grants.map((g) => (
-                <form action={act} key={g.id}>{hidden}<input type="hidden" name="grantId" value={g.id} /><button name="op" value="revoke-grant" disabled={!isAdmin}><Badge tone="purple">{g.equipment.name} ×</Badge></button></form>
+                <form action={act} key={g.id}>{hidden}<input type="hidden" name="grantId" value={g.id} /><button name="op" value="revoke-grant" disabled={!isAdmin}><Badge tone="live">{g.equipment.name} ×</Badge></button></form>
               ))}
             </div>
             {isAdmin && (
@@ -231,11 +231,11 @@ export default async function CustomerDetail({ params, searchParams }: { params:
             <ul className="mb-3 space-y-1 text-sm">
               {customer.rateOverrides.map((r) => (
                 <li key={r.id} className="flex items-center justify-between">
-                  <span>{r.equipment.name}: <span className="tabular-nums">{money(r.hourlyRateCents, s.currency)}/h</span> <span className="text-xs text-slate-500">(list {money(r.equipment.hourlyRateCents, s.currency)})</span></span>
-                  {isAdmin && <form action={act}>{hidden}<input type="hidden" name="rateId" value={r.id} /><button name="op" value="remove-rate" className="text-xs text-red-600">remove</button></form>}
+                  <span>{r.equipment.name}: <span className="tabular-nums">{money(r.hourlyRateCents, s.currency)}/h</span> <span className="text-xs text-deep-blue">(list {money(r.equipment.hourlyRateCents, s.currency)})</span></span>
+                  {isAdmin && <form action={act}>{hidden}<input type="hidden" name="rateId" value={r.id} /><button name="op" value="remove-rate" className="text-xs font-bold text-deep-blue">remove</button></form>}
                 </li>
               ))}
-              {customer.rateOverrides.length === 0 && <li className="text-slate-500">List prices apply.</li>}
+              {customer.rateOverrides.length === 0 && <li className="text-deep-blue">List prices apply.</li>}
             </ul>
             {isAdmin && (
               <form action={act} className="flex gap-2">
@@ -245,7 +245,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
                 <button name="op" value="rate" className="btn-secondary">Set rate</button>
               </form>
             )}
-            <p className="mt-2 text-xs text-slate-500">Rates are captured on each booking at the time it is made.</p>
+            <p className="mt-2 text-xs text-deep-blue">Rates are captured on each booking at the time it is made.</p>
           </Card>
 
           {isAdmin && (

@@ -8,7 +8,7 @@ import { daysOverdue } from "@/lib/domain/invoice-automation";
 import { periodOf, previousPeriod } from "@/lib/domain/time";
 import { errMsg, flash, str } from "@/lib/actions";
 import { fmtDate, money, periodLabel } from "@/lib/format";
-import { Card, Empty, Flash, PageHeader, Stat, StatusBadge } from "@/components/ui";
+import { Badge, Card, Empty, Flash, PageHeader, Stat, StatusBadge } from "@/components/ui";
 
 async function generate(fd: FormData) {
   "use server";
@@ -91,11 +91,11 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
                 const od = i.status === "ISSUED" ? daysOverdue(i, now) : 0;
                 return (
                   <tr key={i.id}>
-                    <td><Link className="link font-mono" href={`/admin/invoices/${i.id}`}>{i.number}</Link>{i.warnings.length > 0 && i.status === "DRAFT" && <span className="ml-1 text-amber-600" title={i.warnings.join("\n")}>⚠</span>}</td>
+                    <td><Link className="link font-mono" href={`/admin/invoices/${i.id}`}>{i.number}</Link>{i.warnings.length > 0 && i.status === "DRAFT" && <span className="ml-1" title={i.warnings.join("\n")}><Badge tone="attention">check</Badge></span>}</td>
                     <td>{i.customer.name}</td>
                     <td>{i.period}</td>
                     <td>{fmtDate(i.issuedAt, s.timezone)}</td>
-                    <td className={od ? "text-red-700" : ""}>{fmtDate(i.dueAt, s.timezone)}{od > 0 && ` (+${od}d)`}</td>
+                    <td className={od ? "font-bold text-deep-blue" : ""}>{fmtDate(i.dueAt, s.timezone)}{od > 0 && ` (+${od}d)`}</td>
                     <td className="text-right tabular-nums">{money(i.totalCents, i.currency)}</td>
                     <td className="text-right tabular-nums">{money(i.totalCents - i.paidCents, i.currency)}</td>
                     <td><StatusBadge status={od > 0 ? "OVERDUE" : i.status} /></td>

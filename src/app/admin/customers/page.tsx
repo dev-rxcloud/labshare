@@ -60,11 +60,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                 const overdue = c.invoices.some((i) => i.dueAt && i.dueAt < now);
                 return (
                   <tr key={c.id}>
-                    <td><Link className="link" href={`/admin/customers/${c.id}`}>{c.name}</Link><div className="text-xs text-slate-500">{c.billingEmail}</div></td>
+                    <td><Link className="link" href={`/admin/customers/${c.id}`}>{c.name}</Link><div className="text-xs text-deep-blue">{c.billingEmail}</div></td>
                     <td>{c.tier.name}</td>
-                    <td>{c.officeSuite ?? "—"}{c.monthlyOfficeRentCents > 0 && <div className="text-xs text-slate-500">{money(c.monthlyOfficeRentCents, s.currency)}/mo</div>}</td>
+                    <td>{c.officeSuite ?? "—"}{c.monthlyOfficeRentCents > 0 && <div className="text-xs text-deep-blue">{money(c.monthlyOfficeRentCents, s.currency)}/mo</div>}</td>
                     <td className="text-right">{c._count.users}</td>
-                    <td className={`text-right tabular-nums ${overdue ? "text-red-700" : ""}`}>{money(outstanding, s.currency)}</td>
+                    <td className={`text-right tabular-nums ${overdue ? "font-bold text-deep-blue" : ""}`}>{money(outstanding, s.currency)}</td>
                     <td><StatusBadge status={c.status} /></td>
                   </tr>
                 );
@@ -85,7 +85,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                 <div><label className="label">Office suite</label><input className="input" name="officeSuite" /></div>
                 <div><label className="label">Rent / month</label><input className="input" name="rent" placeholder="0.00" /></div>
               </div>
-              <div className="border-t border-slate-100 pt-3 text-xs font-medium text-slate-500">First admin user</div>
+              <div className="border-t border-canvas pt-3 text-xs font-medium text-deep-blue">First admin user</div>
               <div><label className="label">Name</label><input className="input" name="adminName" required /></div>
               <div><label className="label">Email</label><input className="input" type="email" name="adminEmail" required /></div>
               <div><label className="label">Temporary password</label><input className="input" name="adminPassword" minLength={8} required /></div>
