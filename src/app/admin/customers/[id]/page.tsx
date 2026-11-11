@@ -198,7 +198,7 @@ export default async function CustomerDetail({ params, searchParams }: { params:
               </tbody>
             </table>
             {isAdmin && (
-              <form action={act} className="mt-4 grid gap-2 border-t border-canvas pt-4 sm:grid-cols-5">
+              <form action={act} className="mt-4 grid gap-2 border-t border-secondary-grey pt-4 sm:grid-cols-5">
                 {hidden}
                 <input className="input" name="name" placeholder="Name" required />
                 <input className="input" name="email" type="email" placeholder="Email" required />

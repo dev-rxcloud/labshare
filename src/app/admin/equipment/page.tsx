@@ -61,9 +61,9 @@ export default async function EquipmentAdmin({ searchParams }: { searchParams: P
                   <td>{e.category.name}</td>
                   <td className="text-right tabular-nums">{money(e.hourlyRateCents, s.currency)}/h</td>
                   <td className="space-x-1">
-                    {e.restricted ? <Badge tone="urgent">grant only ({e._count.grants})</Badge> : <Badge>level {e.minTierLevel}+</Badge>}
+                    {e.restricted ? <Badge tone="neutral">grant only ({e._count.grants})</Badge> : <Badge>level {e.minTierLevel}+</Badge>}
                     {e.requiresCertification && <Badge tone="info">cert ({e._count.certifications})</Badge>}
-                    {e.requiresApproval && <Badge tone="live">approval</Badge>}
+                    {e.requiresApproval && <Badge tone="attention">approval</Badge>}
                   </td>
                   <td><StatusBadge status={e.status} /></td>
                 </tr>
@@ -76,7 +76,7 @@ export default async function EquipmentAdmin({ searchParams }: { searchParams: P
             <p className="mb-3 text-xs text-deep-blue">A plan's level decides which equipment its customers can book (equipment "level N+"). Its discount applies to usage on the invoice.</p>
             <div className="space-y-3">
               {[...tiers, null].map((t) => (
-                <form key={t?.id ?? "new"} action={act} className="grid grid-cols-6 gap-1 rounded border border-canvas p-2">
+                <form key={t?.id ?? "new"} action={act} className="grid grid-cols-6 gap-1 rounded border border-secondary-grey p-2">
                   <input type="hidden" name="op" value="tier" />
                   <input type="hidden" name="tierId" value={t?.id ?? ""} />
                   <input className="input col-span-3" name="name" defaultValue={t?.name} placeholder="New plan" required disabled={!isAdmin} />

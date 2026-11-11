@@ -85,7 +85,7 @@ export default async function EquipmentPage({ params, searchParams }: { params: 
             </div>
           }
         >
-          <div className="relative mt-6 h-14 rounded-md border border-deep-blue bg-canvas">
+          <div className="relative mt-6 h-14 rounded-lg border border-secondary-grey bg-canvas">
             {Array.from({ length: toH - fromH + 1 }, (_, i) => fromH + i).map((h) => (
               <div key={h} className="absolute top-0 h-full border-l border-secondary-grey" style={{ left: `${((h - fromH) / (toH - fromH)) * 100}%` }}>
                 <span className="absolute -top-5 -translate-x-1/2 text-[11px] font-bold text-deep-blue">{h}</span>

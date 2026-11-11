@@ -6,10 +6,10 @@ export default async function PortalLayout({ children }: { children: React.React
   const user = await requireCustomerUser();
   const isAdmin = user.role === "CUSTOMER_ADMIN";
   const nav = [
-    { href: "/portal", label: "Dashboard" },
-    { href: "/portal/equipment", label: "Book equipment" },
-    { href: "/portal/bookings", label: "Bookings" },
-    ...(isAdmin ? [{ href: "/portal/usage", label: "Usage" }, { href: "/portal/invoices", label: "Invoices" }, { href: "/portal/team", label: "Team" }] : []),
+    { href: "/portal", label: "Dashboard", icon: "overview", section: "Lab" },
+    { href: "/portal/equipment", label: "Book equipment", icon: "book", section: "Lab" },
+    { href: "/portal/bookings", label: "My bookings", icon: "bookings", section: "Lab" },
+    ...(isAdmin ? [{ href: "/portal/usage", label: "Usage", icon: "usage", section: "Organisation" }, { href: "/portal/invoices", label: "Invoices", icon: "invoices", section: "Organisation" }, { href: "/portal/team", label: "Team", icon: "team", section: "Organisation" }] : []),
   ];
   return (
     <Shell brand={(await getSettings()).facilityName} nav={nav} user={{ name: user.name, subtitle: `${user.customer.name} · ${isAdmin ? "Admin" : "Member"}` }}>

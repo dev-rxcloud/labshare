@@ -46,7 +46,7 @@ export default async function AutomationPage({ searchParams }: { searchParams: P
           {runs.length === 0 ? <Empty>No runs yet.</Empty> : (
             <ul className="space-y-2 text-xs">
               {runs.map((r) => (
-                <li key={r.id} className="rounded border border-canvas p-2">
+                <li key={r.id} className="rounded border border-secondary-grey p-2">
                   <div className="mb-1 flex justify-between"><span className="font-medium">{fmt(r.startedAt, s.timezone)}</span><StatusBadge status={r.ok ? "COMPLETED" : r.ok === false ? "NO_SHOW" : "CONFIRMED"} /></div>
                   <pre className="overflow-x-auto whitespace-pre-wrap text-deep-blue">{JSON.stringify(r.summary)}</pre>
                 </li>

@@ -26,7 +26,7 @@ export default async function EquipmentCatalog() {
       <div className="space-y-8">
         {[...groups].map(([category, items]) => (
           <section key={category}>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-deep-blue">{category}</h2>
+            <h2 className="mb-3 text-base font-bold">{category}</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((e) => {
                 const cert = certs.find((c) => c.equipmentId === e.id);
@@ -51,14 +51,14 @@ export default async function EquipmentCatalog() {
                     <div className="mt-3 flex flex-wrap gap-1">
                       {e.status === "MAINTENANCE" && <Badge tone="attention">maintenance</Badge>}
                       {e.requiresCertification && <Badge tone={cert ? "good" : "neutral"}>{cert ? "certified" : "training required"}</Badge>}
-                      {e.requiresApproval && <Badge tone="live">needs approval</Badge>}
-                      {e.restricted && <Badge tone="urgent">restricted</Badge>}
+                      {e.requiresApproval && <Badge tone="info">needs approval</Badge>}
+                      {e.restricted && <Badge tone="neutral">restricted</Badge>}
                     </div>
                     <div className="mt-auto pt-4">
                       {access.allowed ? (
-                        <Link href={`/portal/equipment/${e.id}`} className="btn-primary w-full">Check availability</Link>
+                        <Link href={`/portal/equipment/${e.id}`} className="btn-secondary w-full">Check availability</Link>
                       ) : (
-                        <div className="rounded-md bg-canvas px-3 py-2 text-xs text-deep-blue">{access.message}</div>
+                        <div className="rounded-lg bg-secondary-grey px-3 py-2 text-xs text-deep-blue">{access.message}</div>
                       )}
                     </div>
                   </div>

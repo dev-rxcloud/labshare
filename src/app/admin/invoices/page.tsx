@@ -1,3 +1,4 @@
+import { Banknote, FilePen, Hourglass, ReceiptText } from "lucide-react";
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { requireUser } from "@/lib/auth";
@@ -63,10 +64,10 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Pro
       />
       <Flash searchParams={sp} />
       <div className="mb-6 grid gap-4 sm:grid-cols-4">
-        <Stat label="Invoiced" value={money(sum((i) => i.totalCents), s.currency)} />
-        <Stat label="Collected" value={money(sum((i) => i.paidCents), s.currency)} />
-        <Stat label="Outstanding" value={money(sum((i) => (i.status === "DRAFT" ? 0 : i.totalCents - i.paidCents)), s.currency)} />
-        <Stat label="Drafts awaiting review" value={drafts.length} />
+        <Stat icon={<ReceiptText size={20} aria-hidden />} label="Invoiced" value={money(sum((i) => i.totalCents), s.currency)} />
+        <Stat icon={<Banknote size={20} aria-hidden />} label="Collected" value={money(sum((i) => i.paidCents), s.currency)} />
+        <Stat icon={<Hourglass size={20} aria-hidden />} label="Outstanding" value={money(sum((i) => (i.status === "DRAFT" ? 0 : i.totalCents - i.paidCents)), s.currency)} />
+        <Stat icon={<FilePen size={20} aria-hidden />} label="Drafts awaiting review" value={drafts.length} />
       </div>
       {period && (
         <div className="mb-4 flex flex-wrap gap-2">

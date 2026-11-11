@@ -1,3 +1,4 @@
+import { Clock, TriangleAlert, Wallet } from "lucide-react";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -31,9 +32,9 @@ export default async function UsageReview({ searchParams }: { searchParams: Prom
     <>
       <PageHeader title={`Usage review · ${periodLabel(period)}`} subtitle="Review each customer's usage before invoices go out. Figures for uninvoiced customers are live." actions={<PeriodPicker period={period} base="/admin/usage" />} />
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <Stat label="Total billable" value={money(total, s.currency)} />
-        <Stat label="Uninvoiced billable hours" value={Math.round(hours * 100) / 100} />
-        <Stat label="Customers needing attention" value={flagged} hint="Open or auto-closed bookings" />
+        <Stat icon={<Wallet size={20} aria-hidden />} label="Total billable" value={money(total, s.currency)} />
+        <Stat icon={<Clock size={20} aria-hidden />} label="Uninvoiced billable hours" value={Math.round(hours * 100) / 100} />
+        <Stat icon={<TriangleAlert size={20} aria-hidden />} label="Customers needing attention" value={flagged} hint="Open or auto-closed bookings" />
       </div>
       <Card>
         <table className="table">

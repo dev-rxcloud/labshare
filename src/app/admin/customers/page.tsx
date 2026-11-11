@@ -85,7 +85,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                 <div><label className="label">Office suite</label><input className="input" name="officeSuite" /></div>
                 <div><label className="label">Rent / month</label><input className="input" name="rent" placeholder="0.00" /></div>
               </div>
-              <div className="border-t border-canvas pt-3 text-xs font-medium text-deep-blue">First admin user</div>
+              <div className="border-t border-secondary-grey pt-3 text-xs font-medium text-deep-blue">First admin user</div>
               <div><label className="label">Name</label><input className="input" name="adminName" required /></div>
               <div><label className="label">Email</label><input className="input" type="email" name="adminEmail" required /></div>
               <div><label className="label">Temporary password</label><input className="input" name="adminPassword" minLength={8} required /></div>

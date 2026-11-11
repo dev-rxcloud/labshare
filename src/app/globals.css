@@ -3,17 +3,18 @@
 /*
  * RxCloud Design System (organisation default): https://claude.ai/artifact/GABMgKiqtJrEfmogUm9Cck
  * Colours come ONLY from its tokens.json. Tailwind's default palette is removed below, so any
- * colour class outside these tokens produces no CSS at all. No tints, gradients, opacity or shadows.
+ * colour class outside these tokens produces no CSS at all. No tints, gradients, opacity or shadows:
+ * depth comes from hairline Secondary Grey borders and whitespace instead.
  */
 @theme {
   --color-*: initial;
-  --color-deep-blue: #244065;          /* text, primary actions, solid bars */
+  --color-deep-blue: #244065;          /* text, primary actions, sidebar */
   --color-forest-green: #009681;       /* borders, bars, rules, large bold text only */
   --color-forest-green-text: #007464;  /* small green text (pending brand-owner approval) */
-  --color-secondary-aqua: #89D2D6;     /* large fields, info badges */
-  --color-secondary-yellow: #FFF086;   /* small accent fields: attention badges */
-  --color-secondary-grey: #E4E5EE;     /* cards and panels */
-  --color-canvas: #FBFBF9;             /* page ground; text on deep-blue */
+  --color-secondary-aqua: #89D2D6;     /* icon chips, info badges */
+  --color-secondary-yellow: #FFF086;   /* attention badges and notices */
+  --color-secondary-grey: #E4E5EE;     /* hairlines, table heads, hover fills */
+  --color-canvas: #FBFBF9;             /* page and card ground; text on deep-blue */
 
   --font-sans: var(--font-quicksand), "Helvetica Neue", Arial, sans-serif;
   --font-display: var(--font-playfair), Georgia, serif;
@@ -21,32 +22,41 @@
   --shadow-*: initial;
 }
 
+html { @apply bg-canvas; }
 body { @apply bg-canvas font-sans font-medium text-deep-blue antialiased; }
 
 /* Page headline: the single Playfair Display Bold element per screen. */
-.headline { @apply font-display text-3xl font-bold tracking-tight text-deep-blue; }
+.headline { @apply font-display text-[1.75rem] leading-tight font-bold tracking-tight text-deep-blue sm:text-[2rem]; }
 
-.btn-primary { @apply inline-flex cursor-pointer items-center justify-center gap-1 rounded-md border-2 border-deep-blue bg-deep-blue px-3 py-1.5 text-sm font-bold text-canvas transition hover:border-forest-green-text hover:bg-forest-green-text disabled:cursor-not-allowed disabled:border-secondary-grey disabled:bg-secondary-grey disabled:text-deep-blue; }
-.btn-secondary { @apply inline-flex cursor-pointer items-center justify-center gap-1 rounded-md border border-deep-blue bg-canvas px-3 py-1.5 text-sm font-bold text-deep-blue transition hover:bg-secondary-aqua disabled:cursor-not-allowed; }
-/* No red exists in the brand palette: destructive actions are distinguished by a heavier outline and their label. */
-.btn-danger { @apply inline-flex cursor-pointer items-center justify-center gap-1 rounded-md border-2 border-deep-blue bg-canvas px-3 py-1.5 text-sm font-bold text-deep-blue transition hover:bg-secondary-yellow; }
+.btn-primary { @apply inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-deep-blue px-3.5 text-sm font-bold text-canvas transition-colors hover:bg-forest-green-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest-green focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:cursor-not-allowed disabled:bg-secondary-grey disabled:text-deep-blue; }
+.btn-secondary { @apply inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-secondary-grey bg-canvas px-3.5 text-sm font-bold text-deep-blue transition-colors hover:border-deep-blue hover:bg-secondary-grey focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest-green disabled:cursor-not-allowed; }
+/* No red exists in the brand palette: destructive actions are distinguished by a Deep Blue outline, yellow hover and their label. */
+.btn-danger { @apply inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-deep-blue bg-canvas px-3.5 text-sm font-bold text-deep-blue transition-colors hover:bg-secondary-yellow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-forest-green; }
 
-.input { @apply w-full rounded-md border border-deep-blue bg-canvas px-2.5 py-1.5 text-sm font-medium text-deep-blue focus:outline-none focus:ring-2 focus:ring-forest-green disabled:border-secondary-grey; }
+.input { @apply h-9 w-full rounded-lg border border-deep-blue bg-canvas px-3 text-sm font-medium text-deep-blue transition-shadow focus:border-forest-green focus:outline-none focus:ring-2 focus:ring-forest-green disabled:border-secondary-grey; }
+textarea.input { @apply h-auto py-2; }
 .input::placeholder { color: var(--color-deep-blue); font-weight: 400; font-style: italic; }
-.label { @apply mb-1 block text-xs font-bold uppercase tracking-[0.08em] text-deep-blue; }
+.label { @apply mb-1.5 block text-[13px] font-bold text-deep-blue; }
 .muted { @apply text-xs font-medium text-deep-blue; }
 
-.card { @apply rounded-lg bg-secondary-grey; }
-.table { @apply w-full text-sm; }
-.table th { @apply border-b-2 border-forest-green px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.08em] text-deep-blue; }
-.table td { @apply border-b-2 border-canvas px-3 py-2 align-top; }
-.link { @apply font-bold text-deep-blue underline decoration-forest-green decoration-2 underline-offset-4 hover:decoration-deep-blue; }
+.card { @apply rounded-2xl border border-secondary-grey bg-canvas; }
+
+.table { @apply w-full border-separate border-spacing-0 text-sm; }
+.table th { @apply border-b border-secondary-grey bg-secondary-grey px-3 py-2.5 text-left text-xs font-bold text-deep-blue first:rounded-l-lg last:rounded-r-lg; }
+.table td { @apply border-b border-secondary-grey px-3 py-3 align-top; }
+.table tbody tr:last-child td { @apply border-b-0; }
+.table tbody tr { @apply transition-colors hover:bg-secondary-grey; }
+.table tfoot td { @apply border-b-0 py-1.5; }
+
+.link { @apply font-bold text-deep-blue underline decoration-forest-green decoration-2 underline-offset-4 transition-colors hover:decoration-deep-blue; }
 
 /* Notices: success = Forest Green rule; problem = Secondary Yellow field with a Deep Blue rule. */
-.notice-ok { @apply rounded-md border-2 border-forest-green bg-canvas px-4 py-3 text-sm font-semibold text-deep-blue; }
-.notice-problem { @apply rounded-md border-2 border-deep-blue bg-secondary-yellow px-4 py-3 text-sm font-semibold text-deep-blue; }
+.notice-ok { @apply flex items-start gap-2 rounded-xl border border-forest-green bg-canvas px-4 py-3 text-sm font-semibold text-deep-blue; }
+.notice-problem { @apply flex items-start gap-2 rounded-xl border border-deep-blue bg-secondary-yellow px-4 py-3 text-sm font-semibold text-deep-blue; }
+ul.notice-problem { @apply block; }
 
 @media print {
   .no-print { display: none !important; }
-  .card { background: var(--color-canvas); }
+  .print-full { margin: 0 !important; padding: 0 !important; }
+  .card { border: none; }
 }

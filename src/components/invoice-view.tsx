@@ -94,14 +94,14 @@ export async function InvoiceView({ invoice }: { invoice: NonNullable<Awaited<Re
           </ul>
         </div>
       )}
-      <p className="mt-8 border-t border-canvas pt-4 text-xs text-deep-blue">{s.invoiceFooter}</p>
+      <p className="mt-8 border-t border-secondary-grey pt-4 text-xs text-deep-blue">{s.invoiceFooter}</p>
     </div>
   );
 }
 
 function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
-    <div className={`flex justify-between ${strong ? "border-t border-canvas pt-1 font-semibold" : ""}`}>
+    <div className={`flex justify-between ${strong ? "border-t border-secondary-grey pt-1 font-semibold" : ""}`}>
       <span>{label}</span>
       <span className="tabular-nums">{value}</span>
     </div>

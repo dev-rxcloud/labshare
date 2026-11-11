@@ -1,3 +1,4 @@
+import { Clock, ReceiptText, Wallet } from "lucide-react";
 import Link from "next/link";
 import { requireCustomerUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -33,9 +34,9 @@ export default async function PortalHome() {
         actions={<Link href="/portal/equipment" className="btn-primary">Book equipment</Link>}
       />
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <Stat label={`Billable hours · ${periodLabel(period)}`} value={statement.billableHours} hint={user.customer.monthlyHourQuota ? `Quota ${user.customer.monthlyHourQuota} h/month` : undefined} />
-        {isAdmin && <Stat label="Charges so far this month" value={money(statement.totalCents, s.currency)} hint="Estimate incl. rent and tax, before invoicing" />}
-        {isAdmin && <Stat label="Outstanding invoices" value={money(outstanding, s.currency)} hint={`${openInvoices.length} open`} />}
+        <Stat icon={<Clock size={20} aria-hidden />} label={`Billable hours · ${periodLabel(period)}`} value={statement.billableHours} hint={user.customer.monthlyHourQuota ? `Quota ${user.customer.monthlyHourQuota} h/month` : undefined} />
+        {isAdmin && <Stat icon={<Wallet size={20} aria-hidden />} label="Charges so far this month" value={money(statement.totalCents, s.currency)} hint="Estimate incl. rent and tax, before invoicing" />}
+        {isAdmin && <Stat icon={<ReceiptText size={20} aria-hidden />} label="Outstanding invoices" value={money(outstanding, s.currency)} hint={`${openInvoices.length} open`} />}
       </div>
       <Card title="Your upcoming bookings" actions={<Link className="link text-sm" href="/portal/bookings">All bookings</Link>}>
         {upcoming.length === 0 ? (
