@@ -7,8 +7,10 @@ import { ACTIVE_BOOKING_STATUSES } from "@/lib/domain/booking-rules";
 import { addDays, fromLocal, localDateString, localDayBounds, localParts } from "@/lib/domain/time";
 import { BookingError, accessFor, createBooking } from "@/lib/services/bookings";
 import { errMsg, flash, int, str } from "@/lib/actions";
-import { fmt, hoursLabel, money } from "@/lib/format";
-import { Card, Flash, PageHeader } from "@/components/ui";
+import { fmt, money } from "@/lib/format";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Flash, PageHeader } from "@/components/ui";
+import { SlotPicker, type PickerBlock, type PickerDay } from "@/components/slot-picker";
 
 async function book(fd: FormData) {
   "use server";
@@ -37,32 +39,56 @@ export default async function EquipmentPage({ params, searchParams }: { params: 
   const access = await accessFor(user.id, id);
   const rate = (await prisma.customerEquipmentRate.findUnique({ where: { customerId_equipmentId: { customerId: user.customer.id, equipmentId: id } } }))?.hourlyRateCents ?? equipment.hourlyRateCents;
 
-  const today = localDateString(new Date(), s.timezone);
+  const now = new Date();
+  const today = localDateString(now, s.timezone);
   const date = sp.date && /^\d{4}-\d{2}-\d{2}$/.test(sp.date) ? sp.date : today;
-  const { start: dayStart, end: dayEnd } = localDayBounds(date, s.timezone);
+  // Week (Mon–Sun, facility time) containing the requested date.
+  const noon = fromLocal(date, "12:00", s.timezone);
+  const monday = addDays(noon, -((localParts(noon, s.timezone).weekday + 6) % 7));
+  const dates = Array.from({ length: 7 }, (_, i) => localDateString(addDays(monday, i), s.timezone));
+  const bounds = dates.map((d) => localDayBounds(d, s.timezone));
+  const weekStart = bounds[0].start;
+  const weekEnd = bounds[6].end;
+  const lastBookable = addDays(now, s.maxAdvanceDays);
+  const nowParts = localParts(now, s.timezone);
+
   const [bookings, maintenance] = await Promise.all([
     prisma.booking.findMany({
-      where: { equipmentId: id, status: { in: [...ACTIVE_BOOKING_STATUSES] }, startsAt: { lt: dayEnd }, endsAt: { gt: dayStart } },
+      where: { equipmentId: id, status: { in: [...ACTIVE_BOOKING_STATUSES] }, startsAt: { lt: weekEnd }, endsAt: { gt: weekStart } },
       orderBy: { startsAt: "asc" },
     }),
-    prisma.maintenanceWindow.findMany({ where: { equipmentId: id, startsAt: { lt: dayEnd }, endsAt: { gt: dayStart } } }),
+    prisma.maintenanceWindow.findMany({ where: { equipmentId: id, startsAt: { lt: weekEnd }, endsAt: { gt: weekStart } } }),
   ]);
 
-  const fromH = equipment.bookableFromHour;
-  const toH = equipment.bookableToHour;
-  const span = (toH - fromH) * 60;
-  const pos = (d: Date) => {
-    const clamped = Math.min(Math.max(d.getTime(), dayStart.getTime()), dayEnd.getTime());
-    const p = localParts(new Date(clamped), s.timezone);
-    const mins = clamped === dayEnd.getTime() ? 24 * 60 : p.hour * 60 + p.minute;
-    return Math.min(100, Math.max(0, ((mins - fromH * 60) / span) * 100));
+  // Minutes since local midnight of an instant clipped to a day.
+  const minuteOf = (d: Date, day: { start: Date; end: Date }) => {
+    if (d <= day.start) return 0;
+    if (d >= day.end) return 1440;
+    const p = localParts(d, s.timezone);
+    return p.hour * 60 + p.minute;
   };
-  const startOptions: string[] = [];
-  for (let m = fromH * 60; m + equipment.minBookingMinutes <= toH * 60; m += s.slotMinutes)
-    startOptions.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
-  const durations: number[] = [];
-  for (let d = equipment.minBookingMinutes; d <= equipment.maxBookingMinutes; d += s.slotMinutes) durations.push(d);
-  const dayNav = (offset: number) => localDateString(addDays(fromLocal(date, "12:00", s.timezone), offset), s.timezone);
+  const blocks: PickerBlock[] = [];
+  const addBlock = (startsAt: Date, endsAt: Date, kind: PickerBlock["kind"], label: string) =>
+    bounds.forEach((day, i) => {
+      if (startsAt < day.end && endsAt > day.start) blocks.push({ day: i, start: minuteOf(startsAt, day), end: minuteOf(endsAt, day), kind, label });
+    });
+  for (const b of bookings) {
+    const mine = b.customerId === user.customer.id;
+    const when = `${fmt(b.startsAt, s.timezone, "HH:mm")}–${fmt(b.endsAt, s.timezone, "HH:mm")}`;
+    addBlock(b.startsAt, b.endsAt, mine ? "mine" : "booked", mine ? `Yours ${when}${b.status === "PENDING_APPROVAL" ? " (pending)" : ""}` : `Booked ${when}`);
+  }
+  for (const m of maintenance) addBlock(m.startsAt, m.endsAt, "maintenance", `Maintenance${m.reason ? ` · ${m.reason}` : ""}`);
+
+  const days: PickerDay[] = dates.map((d, i) => ({
+    date: d,
+    weekday: fmt(fromLocal(d, "12:00", s.timezone), s.timezone, "EEE"),
+    dayNum: String(Number(d.slice(8))),
+    isToday: d === today,
+    pastUntil: d < today ? 1440 : d === today ? nowParts.hour * 60 + nowParts.minute : 0,
+    bookable: bounds[i].start < lastBookable,
+  }));
+  const weekNav = (offset: number) => localDateString(addDays(noon, offset * 7), s.timezone);
+  const rangeLabel = `${fmt(bounds[0].start, s.timezone, "d MMM")} – ${fmt(addDays(bounds[6].start, 0), s.timezone, "d MMM yyyy")}`;
 
   return (
     <>
@@ -72,89 +98,32 @@ export default async function EquipmentPage({ params, searchParams }: { params: 
         actions={<Link href="/portal/equipment" className="btn-secondary">All equipment</Link>}
       />
       <Flash searchParams={sp} />
-      {equipment.description && <p className="mb-4 text-sm text-deep-blue">{equipment.description}</p>}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card
-          className="lg:col-span-2"
-          title={`Availability · ${fmt(fromLocal(date, "12:00", s.timezone), s.timezone, "EEEE d MMMM yyyy")}`}
-          actions={
-            <div className="flex gap-1 text-sm">
-              <Link className="btn-secondary" href={`?date=${dayNav(-1)}`}>←</Link>
-              <Link className="btn-secondary" href={`?date=${today}`}>Today</Link>
-              <Link className="btn-secondary" href={`?date=${dayNav(1)}`}>→</Link>
-            </div>
-          }
-        >
-          <div className="relative mt-6 h-14 rounded-lg border border-secondary-grey bg-canvas">
-            {Array.from({ length: toH - fromH + 1 }, (_, i) => fromH + i).map((h) => (
-              <div key={h} className="absolute top-0 h-full border-l border-secondary-grey" style={{ left: `${((h - fromH) / (toH - fromH)) * 100}%` }}>
-                <span className="absolute -top-5 -translate-x-1/2 text-[11px] font-bold text-deep-blue">{h}</span>
-              </div>
-            ))}
-            {bookings.map((b) => (
-              <div
-                key={b.id}
-                title={`${fmt(b.startsAt, s.timezone, "HH:mm")}–${fmt(b.endsAt, s.timezone, "HH:mm")}`}
-                aria-label={b.customerId === user.customer.id ? "Your organisation" : "Booked"}
-                className={`absolute top-1 bottom-1 rounded ${b.customerId === user.customer.id ? "bg-forest-green" : "bg-deep-blue"}`}
-                style={{ left: `${pos(b.startsAt)}%`, width: `${Math.max(0.5, pos(b.endsAt) - pos(b.startsAt))}%` }}
-              />
-            ))}
-            {maintenance.map((m) => (
-              <div key={m.id} title="Maintenance" className="absolute top-1 bottom-1 rounded border-2 border-deep-blue bg-secondary-yellow" style={{ left: `${pos(m.startsAt)}%`, width: `${pos(m.endsAt) - pos(m.startsAt)}%` }}/>
-            ))}
-          </div>
-          <div className="mt-3 flex gap-4 text-xs text-deep-blue">
-            <span><span className="mr-1 inline-block h-3 w-3 rounded border border-deep-blue bg-canvas align-middle" />free</span>
-            <span><span className="mr-1 inline-block h-3 w-3 rounded bg-deep-blue align-middle" />booked</span>
-            <span><span className="mr-1 inline-block h-3 w-3 rounded border-2 border-deep-blue bg-secondary-yellow align-middle" />maintenance</span>
-            <span><span className="mr-1 inline-block h-3 w-3 rounded bg-forest-green align-middle" />your organisation</span>
-            {equipment.bufferMinutes > 0 && <span>{equipment.bufferMinutes} min cleanup is kept free between bookings</span>}
-          </div>
-          {bookings.length > 0 && (
-            <ul className="mt-4 space-y-1 text-sm text-deep-blue">
-              {bookings.map((b) => (
-                <li key={b.id}>{fmt(b.startsAt, s.timezone, "HH:mm")}–{fmt(b.endsAt, s.timezone, "HH:mm")} · {b.customerId === user.customer.id ? "your organisation" : "booked"}</li>
-              ))}
-            </ul>
-          )}
-        </Card>
-        <Card title="Book a slot">
-          {!access.allowed ? (
-            <p className="text-sm text-deep-blue">{access.message}</p>
-          ) : (
-            <form action={book} className="space-y-3">
-              <input type="hidden" name="equipmentId" value={equipment.id} />
-              <div>
-                <label className="label">Date</label>
-                <input className="input" type="date" name="date" defaultValue={date} min={today} required />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="label">Start</label>
-                  <select className="input" name="start" required>
-                    {startOptions.map((t) => <option key={t}>{t}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="label">Duration</label>
-                  <select className="input" name="duration" defaultValue={Math.min(60, equipment.maxBookingMinutes) >= equipment.minBookingMinutes ? 60 : equipment.minBookingMinutes}>
-                    {durations.map((d) => <option key={d} value={d}>{hoursLabel(d)}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="label">Purpose (optional)</label>
-                <input className="input" name="purpose" placeholder="Project / experiment" />
-              </div>
-              <button className="btn-primary w-full">{equipment.requiresApproval ? "Request booking" : "Book"}</button>
-              <p className="text-xs text-deep-blue">
-                You are billed for actual use (check-in to check-out), never less than the booked slot. Cancelling less than {s.lateCancelWindowHours}h before start costs {s.lateCancelFeePercent}% of the slot; no-shows cost {s.noShowFeePercent}%.
-              </p>
-            </form>
-          )}
-        </Card>
+      {equipment.description && <p className="mb-4 text-sm font-medium">{equipment.description}</p>}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <Link className="btn-secondary" href={`?date=${today}`}>Today</Link>
+        <Link className="btn-secondary w-9 px-0" href={`?date=${weekNav(-1)}`} aria-label="Previous week"><ChevronLeft size={18} className="h-[18px] w-[18px] shrink-0" /></Link>
+        <Link className="btn-secondary w-9 px-0" href={`?date=${weekNav(1)}`} aria-label="Next week"><ChevronRight size={18} className="h-[18px] w-[18px] shrink-0" /></Link>
+        <span className="ml-2 text-lg font-bold">{rangeLabel}</span>
       </div>
+      <SlotPicker
+        days={days}
+        blocks={blocks}
+        fromHour={equipment.bookableFromHour}
+        toHour={equipment.bookableToHour}
+        slot={s.slotMinutes}
+        minMinutes={equipment.minBookingMinutes}
+        maxMinutes={equipment.maxBookingMinutes}
+        bufferMinutes={equipment.bufferMinutes}
+        rateCents={rate}
+        currency={s.currency}
+        requiresApproval={equipment.requiresApproval}
+        canBook={access.allowed}
+        accessMessage={access.message}
+        equipmentId={equipment.id}
+        initialDay={Math.max(0, dates.indexOf(date))}
+        policyText={`You're billed for actual use (check-in to check-out), never less than the booked slot. Cancelling less than ${s.lateCancelWindowHours}h before the start costs ${s.lateCancelFeePercent}% of the slot; no-shows cost ${s.noShowFeePercent}%.`}
+        action={book}
+      />
     </>
   );
 }
