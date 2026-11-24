@@ -22,22 +22,27 @@ const AUTO_CHECKOUT_AFTER_MINUTES = 120;
 export async function housekeeping(now = new Date()) {
   const s = await getSettings();
   const noShowCutoff = addMinutes(now, -s.noShowGraceMinutes);
-  const noShows = await prisma.booking.updateMany({
-    where: { status: "CONFIRMED", startsAt: { lt: noShowCutoff } },
-    data: { status: "NO_SHOW" },
-  });
+  // Each change is recorded individually so the Automation activity feed can say exactly what happened.
+  const noShows = await prisma.booking.findMany({ where: { status: "CONFIRMED", startsAt: { lt: noShowCutoff } }, select: { id: true } });
+  for (const b of noShows) {
+    await prisma.booking.update({ where: { id: b.id }, data: { status: "NO_SHOW" } });
+    await audit(null, "booking.auto_no_show", "Booking", b.id);
+  }
   const forgotten = await prisma.booking.findMany({
     where: { status: "CHECKED_IN", endsAt: { lt: addMinutes(now, -AUTO_CHECKOUT_AFTER_MINUTES) } },
   });
   for (const b of forgotten) {
     // Bill the booked slot; staff can correct actual times from the usage review screen.
     await prisma.booking.update({ where: { id: b.id }, data: { status: "COMPLETED", checkedOutAt: b.endsAt, autoClosed: true } });
+    await audit(null, "booking.auto_checkout", "Booking", b.id);
   }
-  const expired = await prisma.booking.updateMany({
-    where: { status: "PENDING_APPROVAL", startsAt: { lt: now } },
-    data: { status: "REJECTED", cancelReason: "Approval request expired" },
-  });
-  return { noShows: noShows.count, autoCheckedOut: forgotten.length, approvalsExpired: expired.count };
+  const expiredList = await prisma.booking.findMany({ where: { status: "PENDING_APPROVAL", startsAt: { lt: now } }, select: { id: true } });
+  for (const b of expiredList) {
+    await prisma.booking.update({ where: { id: b.id }, data: { status: "REJECTED", cancelReason: "Approval request expired" } });
+    await audit(null, "booking.approval_expired", "Booking", b.id);
+  }
+  const expired = { count: expiredList.length };
+  return { noShows: noShows.length, autoCheckedOut: forgotten.length, approvalsExpired: expired.count };
 }
 
 export async function monthEndClose(now = new Date()) {
@@ -81,6 +86,7 @@ export async function invoiceLifecycle(now = new Date()) {
         relatedId: inv.id,
       });
       await prisma.invoice.update({ where: { id: inv.id }, data: { lastReminderAt: now, reminderCount: { increment: 1 } } });
+      await audit(null, `invoice.reminder_${kind.toLowerCase()}`, "Invoice", inv.id);
       out.reminders++;
     }
     const fee = lateFeeCents(inv, s, now);
@@ -91,6 +97,7 @@ export async function invoiceLifecycle(now = new Date()) {
         }),
         prisma.invoice.update({ where: { id: inv.id }, data: { lateFeeApplied: true } }),
       ]);
+      await audit(null, "invoice.late_fee", "Invoice", inv.id, { amountCents: fee });
       out.lateFees++;
     }
   }

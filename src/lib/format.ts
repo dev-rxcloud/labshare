@@ -24,3 +24,16 @@ export function hoursLabel(minutes: number): string {
   const m = minutes % 60;
   return m ? `${h}h ${m}m` : `${h}h`;
 }
+
+/** "in 6 days", "2 h ago", "just now". */
+export function relativeTime(d: Date, now = new Date()): string {
+  const diff = d.getTime() - now.getTime();
+  const abs = Math.abs(diff);
+  const m = Math.round(abs / 60000);
+  let unit: string;
+  if (m < 1) return "just now";
+  if (m < 60) unit = `${m} min`;
+  else if (m < 48 * 60) unit = `${Math.round(m / 60)} h`;
+  else unit = `${Math.round(m / 1440)} days`;
+  return diff > 0 ? `in ${unit}` : `${unit} ago`;
+}
